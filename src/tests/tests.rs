@@ -1,3 +1,4 @@
+use num_format::{Locale, ToFormattedString};
 use crate::exponential_fast::*;
 use crate::inverse_modular::*;
 use crate::prime_gen::*;
@@ -78,7 +79,14 @@ fn test_inverse_modular() {
     const E: u128 = 27u128;
     const P: u128 = 5u128;
     const Q: u128 = 11u128;
-    let d: u128 = inverse_modular(E as u64, P as u64, Q as u64) as u128;
+    let start = std::time::Instant::now();
+    let  d: Option<u64> = inverse_modular(E as u64, P as u64, Q as u64);
+    let duration = start.elapsed();
+    println!("Time elapsed in inverse_modular() is: {:?}", duration);
+    assert_eq!(d.is_some(), true);
+
+    let d: u128 = d.unwrap() as u128;
+    println!("d: {}", d.to_formatted_string(&Locale::fr));
 
     let ed: u128 = E * d;
     let modulo: u128 = (P - 1) * (Q - 1);
