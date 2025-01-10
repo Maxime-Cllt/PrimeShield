@@ -34,18 +34,37 @@ impl MyApp {
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Mon Formulaire");
-            ui.horizontal(|ui| {
-                ui.label("Votre nom: ");
-                ui.text_edit_singleline(&mut self.name);
+            ui.vertical_centered(|ui| {
+                ui.heading("RSA Algorithm");
             });
-            ui.horizontal(|ui| {
-                ui.label("Votre âge: ");
-                ui.add(egui::Slider::new(&mut self.age, 0..=120).text("âge"));
+
+            ui.vertical_centered(|ui| {
+                ui.columns(2, |columns| {
+                    // Première colonne
+                    columns[0].vertical_centered(|ui| {
+                        ui.label("Colonne 1");
+                        ui.horizontal(|ui| {
+                            ui.label("Votre nom: ");
+                            ui.text_edit_singleline(&mut self.name);
+                        });
+                        if ui.button("Soumettre depuis la colonne 1").clicked() {
+                            println!("Nom: {}", self.name);
+                        }
+                    });
+
+                    // Deuxième colonne
+                    columns[1].vertical_centered(|ui| {
+                        ui.label("Colonne 2");
+                        ui.horizontal(|ui| {
+                            ui.label("Votre âge: ");
+                            ui.add(egui::Slider::new(&mut self.age, 0..=120).text("âge"));
+                        });
+                        if ui.button("Soumettre depuis la colonne 2").clicked() {
+                            println!("Âge: {}", self.age);
+                        }
+                    });
+                });
             });
-            if ui.button("Soumettre").clicked() {
-                println!("Nom: {}, Âge: {}", self.name, self.age);
-            }
         });
     }
 }
