@@ -1,8 +1,9 @@
-use num_format::{Locale, ToFormattedString};
 use crate::exponential_fast::*;
 use crate::inverse_modular::*;
 use crate::prime_gen::*;
 use crate::utils::*;
+use num_format::{Locale, ToFormattedString};
+use std::time::Instant;
 
 #[test]
 fn test_pgcd() {
@@ -57,13 +58,13 @@ fn test_prime_gen() {
     const MIN: u64 = 1000;
     const MAX: u64 = 10000;
 
-    assert_eq!(is_prime(3), true);
-    assert_eq!(is_prime(5), true);
-    assert_eq!(is_prime(1243093), true); //1243093 est un nombre premier
+    assert!(is_prime(3));
+    assert!(is_prime(5));
+    assert!(is_prime(1_243_093)); //1243093 est un nombre premier
 
-    let prime: u128 = prime_gen(MIN, MAX) as u128;
-    assert_eq!(prime >= MIN as u128 && prime <= MAX as u128, true);
-    assert_eq!(is_prime(prime as u64), true);
+    let prime: u128 = u128::from(prime_gen(MIN, MAX));
+    assert!(prime >= u128::from(MIN) && prime <= u128::from(MAX));
+    assert!(is_prime(u64::try_from(prime).unwrap()));
 }
 
 #[test]
@@ -79,13 +80,19 @@ fn test_inverse_modular() {
     const E: u128 = 27u128;
     const P: u128 = 5u128;
     const Q: u128 = 11u128;
-    let start = std::time::Instant::now();
-    let  d: Option<u64> = inverse_modular(E as u64, P as u64, Q as u64);
-    let duration = start.elapsed();
-    println!("Time elapsed in inverse_modular() is: {:?}", duration);
-    assert_eq!(d.is_some(), true);
 
-    let d: u128 = d.unwrap() as u128;
+    let start: Instant = Instant::now();
+    let d: Option<u64> = inverse_modular(
+        u64::try_from(E).unwrap(),
+        u64::try_from(P).unwrap(),
+        u64::try_from(Q).unwrap(),
+    );
+    let duration = start.elapsed();
+    println!("Temps écoulé en inverse_modular() est: {duration:?}");
+
+    assert!(d.is_some());
+
+    let d: u128 = u128::from(d.unwrap());
     println!("d: {}", d.to_formatted_string(&Locale::fr));
 
     let ed: u128 = E * d;

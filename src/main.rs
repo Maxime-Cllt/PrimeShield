@@ -1,9 +1,9 @@
 mod utils;
 
+mod exponential_fast;
+mod inverse_modular;
+mod prime_gen;
 #[cfg(test)]
 mod tests;
-mod exponential_fast;
-mod prime_gen;
-mod inverse_modular;
 
 fn main() {}

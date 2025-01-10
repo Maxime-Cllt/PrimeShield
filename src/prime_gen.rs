@@ -1,32 +1,26 @@
 use rand::Rng;
 
 pub fn prime_gen(min: u64, max: u64) -> u64 {
-    if min > max {
-        panic!("min should be less than max");
-    }
+    assert!((min <= max), "min should be less than max");
 
-    let mut tests_vec = vec![];
+    let mut tests_vec: Vec<u64> = vec![];
 
     // on génère un nombre aléatoire entre min et max
     loop {
-
-        let mut num = rand::thread_rng().gen_range(min..max);
+        let mut num: u64 = rand::thread_rng().gen_range(min..max);
 
         // on vérifie si le nombre generé a déjà été testé ou si on a testé tous les nombres entre min et max
-        while tests_vec.contains(&num) && tests_vec.len() < (max - min) as usize {
+        while tests_vec.contains(&num) && tests_vec.len() < usize::try_from(max - min).unwrap() {
             num = rand::thread_rng().gen_range(min..max);
         }
 
         if is_prime(num) {
             return num;
-        } else {
-            tests_vec.push(num);
-            continue;
-        };
-
-    };
+        }
+        tests_vec.push(num);
+        continue;
+    }
 }
-
 
 pub fn is_prime(n: u64) -> bool {
     if n < 2 {
