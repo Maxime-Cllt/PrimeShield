@@ -74,3 +74,13 @@ pub fn exponential_fast_mod(g: u64, x: u64, modu: u64) -> u64 {
     return output;
 }
 
+/// Calcule si e premier avec (p − 1)(q − 1)
+/// # Arguments
+/// * `e` - Le nombre à tester
+/// * `p` - Le premier nombre
+/// * `q` - Le deuxième nombre
+/// # Returns
+/// * `true` si `e` est premier avec (p − 1)(q − 1), `false` sinon
+pub fn e_is_prime_with(e: u64, p: u64, q: u64) -> bool {
+    return are_coprime(e, (p - 1) * (q - 1));
+}

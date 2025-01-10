@@ -1,7 +1,7 @@
 use crate::exponential_fast::*;
 use crate::inverse_modular::*;
-use crate::utils::*;
 use crate::prime_gen::*;
+use crate::utils::*;
 
 #[test]
 fn test_pgcd() {
@@ -51,31 +51,37 @@ fn test_is_probably_prime() {
     }
 }
 
-
 #[test]
 fn test_prime_gen() {
+    const MIN: u64 = 1000;
+    const MAX: u64 = 10000;
 
     assert_eq!(is_prime(3), true);
     assert_eq!(is_prime(5), true);
     assert_eq!(is_prime(1243093), true); //1243093 est un nombre premier
 
-    let min = 1000;
-    let max = 10000;
-    let prime = prime_gen(min, max);
-    assert_eq!(prime >= min && prime <= max, true);
-    assert_eq!(is_prime(prime), true);
+    let prime: u128 = prime_gen(MIN, MAX) as u128;
+    assert_eq!(prime >= MIN as u128 && prime <= MAX as u128, true);
+    assert_eq!(is_prime(prime as u64), true);
 }
 
+#[test]
+fn test_e_is_prime_with() {
+    assert!(e_is_prime_with(27, 5, 11));
+    assert!(!e_is_prime_with(26, 5, 11));
+    assert!(e_is_prime_with(3, 5, 11));
+    assert!(!e_is_prime_with(2, 5, 11));
+}
 
 #[test]
 fn test_inverse_modular() {
-    let e = 27u128;
-    let p = 5u128;
-    let q = 11u128;
-    let d = inverse_modular(e as u64, p as u64, q as  u64) as u128;
+    const E: u128 = 27u128;
+    const P: u128 = 5u128;
+    const Q: u128 = 11u128;
+    let d: u128 = inverse_modular(E as u64, P as u64, Q as u64) as u128;
 
-    let ed = e * d;
-    let modulo = (p - 1) * (q - 1);
-    let res = ed % modulo;
+    let ed: u128 = E * d;
+    let modulo: u128 = (P - 1) * (Q - 1);
+    let res: u128 = ed % modulo;
     assert_eq!(res, 1);
 }
