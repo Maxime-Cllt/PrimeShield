@@ -7,6 +7,7 @@ authors = ["Maxime-Cllt", "Sudo Rahman"]
 
 [dependencies]
 rand = "0"
+tokio = { version = "1", features = ["full"] }
 
 [dev-dependencies]
 

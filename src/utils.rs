@@ -74,27 +74,3 @@ pub fn exponential_fast_mod(g: u64, x: u64, modu: u64) -> u64 {
     return output;
 }
 
-pub fn inverse_modular(a: u64, n: u64) -> u64 {
-    let mut t: u64 = 0;
-    let mut newt: u64 = 1;
-    let mut r: u64 = n;
-    let mut newr: u64 = a;
-
-    while newr != 0 {
-        let quotient: u64 = r / newr;
-        let tmp: u64 = t;
-        t = newt;
-        newt = tmp - quotient * newt;
-        let tmp: u64 = r;
-        r = newr;
-        newr = tmp - quotient * newr;
-    }
-
-    assert!(!(r > 1), "{a} n'est pas inversible modulo {n}");
-
-    if t < 0 {
-        t += n;
-    }
-
-    return t;
-}

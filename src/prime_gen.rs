@@ -1,6 +1,6 @@
 use rand::Rng;
 
-pub fn prime_gen(min: u128, max: u128) -> u128 {
+pub fn prime_gen(min: u64, max: u64) -> u64 {
     if min > max {
         panic!("min should be less than max");
     }
@@ -28,7 +28,7 @@ pub fn prime_gen(min: u128, max: u128) -> u128 {
 }
 
 
-pub fn is_prime(n: u128) -> bool {
+pub fn is_prime(n: u64) -> bool {
     if n < 2 {
         return false;
     }

@@ -1,5 +1,6 @@
-use crate::exponential_fast::exponential_fast;
-use crate::utils::{are_coprime, exponential_fast_mod, is_probably_prime, pgcd};
+use crate::exponential_fast::*;
+use crate::inverse_modular::*;
+use crate::utils::*;
 use crate::prime_gen::*;
 
 #[test]
@@ -63,4 +64,18 @@ fn test_prime_gen() {
     let prime = prime_gen(min, max);
     assert_eq!(prime >= min && prime <= max, true);
     assert_eq!(is_prime(prime), true);
+}
+
+
+#[test]
+fn test_inverse_modular() {
+    let e = 27u128;
+    let p = 5u128;
+    let q = 11u128;
+    let d = inverse_modular(e as u64, p as u64, q as  u64) as u128;
+
+    let ed = e * d;
+    let modulo = (p - 1) * (q - 1);
+    let res = ed % modulo;
+    assert_eq!(res, 1);
 }
