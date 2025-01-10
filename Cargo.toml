@@ -8,6 +8,8 @@ authors = ["Maxime-Cllt", "Sudo Rahman"]
 [dependencies]
 rand = "0"
 rayon = "1"
+egui = "0"
+eframe = "0"
 
 [dev-dependencies]
 num-format = "0"
