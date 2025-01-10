@@ -10,7 +10,7 @@ pub fn pgcd(a: u64, b: u64) -> u64 {
         a = b;
         b = r;
     }
-    a
+    return a;
 }
 
 /// Vérifie si deux nombres sont premiers entre eux
@@ -20,7 +20,7 @@ pub fn pgcd(a: u64, b: u64) -> u64 {
 /// # Returns
 /// * `true` si les deux nombres sont premiers entre eux, `false` sinon
 pub fn are_coprime(a: u64, b: u64) -> bool {
-    pgcd(a, b) == 1
+    return pgcd(a, b) == 1;
 }
 
 /// Vérifie si un nombre est probablement premier en utilisant les bases 2, 3, 5 et 7
@@ -49,7 +49,7 @@ pub fn is_probably_prime(n: u64) -> bool {
         }
     }
 
-    true
+    return true;
 }
 
 /// Calcule l'exponentiation rapide de g^x mod n
@@ -68,8 +68,33 @@ pub fn exponential_fast_mod(g: u64, x: u64, modu: u64) -> u64 {
         if x & 1 == 1 {
             output = (output * aux) % modu;
         }
-        x = x >> 1;
+        x >>= 1;
         aux = (aux * aux) % modu;
     }
-    output
+    return output;
+}
+
+pub fn inverse_modular(a: u64, n: u64) -> u64 {
+    let mut t: u64 = 0;
+    let mut newt: u64 = 1;
+    let mut r: u64 = n;
+    let mut newr: u64 = a;
+
+    while newr != 0 {
+        let quotient: u64 = r / newr;
+        let tmp: u64 = t;
+        t = newt;
+        newt = tmp - quotient * newt;
+        let tmp: u64 = r;
+        r = newr;
+        newr = tmp - quotient * newr;
+    }
+
+    assert!(!(r > 1), "{a} n'est pas inversible modulo {n}");
+
+    if t < 0 {
+        t += n;
+    }
+
+    return t;
 }

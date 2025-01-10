@@ -1,5 +1,5 @@
 use crate::exponential_fast::exponential_fast;
-use crate::utils::{are_coprime, is_probably_prime, pgcd};
+use crate::utils::{are_coprime, exponential_fast_mod, is_probably_prime, pgcd};
 use crate::prime_gen::*;
 
 #[test]
@@ -12,10 +12,10 @@ fn test_pgcd() {
 
 #[test]
 fn test_are_co_prime() {
-    assert_eq!(are_coprime(12, 18), false);
-    assert_eq!(are_coprime(12, 35), true);
-    assert_eq!(are_coprime(12, 37), true);
-    assert_eq!(are_coprime(12, 39), false);
+    assert!(!are_coprime(12, 18));
+    assert!(are_coprime(12, 35));
+    assert!(are_coprime(12, 37));
+    assert!(!are_coprime(12, 39));
 }
 
 #[test]
@@ -28,16 +28,25 @@ fn test_exponential_fast() {
 }
 
 #[test]
+fn test_exponential_fast_mod() {
+    assert_eq!(exponential_fast_mod(2, 0, 3), 1);
+    assert_eq!(exponential_fast_mod(2, 1, 3), 2);
+    assert_eq!(exponential_fast_mod(2, 2, 3), 1);
+    assert_eq!(exponential_fast_mod(2, 3, 3), 2);
+    assert_eq!(exponential_fast_mod(2, 4, 3), 1);
+}
+
+#[test]
 fn test_is_probably_prime() {
     const PRIME_TO_TEST: [u64; 11] = [3, 5, 7, 11, 13, 19, 241, 599, 1319, 3671, 7879];
     const NORMAL_TO_TEST: [u64; 7] = [10, 20, 30, 50, 1000, 55555, 45678];
 
     for &n in &PRIME_TO_TEST {
-        assert_eq!(is_probably_prime(n), true);
+        assert!(is_probably_prime(n));
     }
 
     for &n in &NORMAL_TO_TEST {
-        assert_eq!(is_probably_prime(n), false);
+        assert!(!is_probably_prime(n));
     }
 }
 
