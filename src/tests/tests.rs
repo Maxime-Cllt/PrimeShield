@@ -1,5 +1,6 @@
 use crate::exponential_fast::exponential_fast;
 use crate::utils::{are_coprime, is_probably_prime, pgcd};
+use crate::prime_gen::*;
 
 #[test]
 fn test_pgcd() {
@@ -38,4 +39,19 @@ fn test_is_probably_prime() {
     for &n in &NORMAL_TO_TEST {
         assert_eq!(is_probably_prime(n), false);
     }
+}
+
+
+#[test]
+fn test_prime_gen() {
+
+    assert_eq!(is_prime(3), true);
+    assert_eq!(is_prime(5), true);
+    assert_eq!(is_prime(1243093), true); //1243093 est un nombre premier
+
+    let min = 1000;
+    let max = 10000;
+    let prime = prime_gen(min, max);
+    assert_eq!(prime >= min && prime <= max, true);
+    assert_eq!(is_prime(prime), true);
 }

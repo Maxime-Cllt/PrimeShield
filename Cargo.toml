@@ -6,7 +6,7 @@ repository = "https://github.com/Maxime-Cllt/PrimeShield.git"
 authors = ["Maxime-Cllt", "Sudo Rahman"]
 
 [dependencies]
-rand = "0.9.0-beta.1"
+rand = "0"
 
 [dev-dependencies]
 
