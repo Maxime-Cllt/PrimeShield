@@ -82,5 +82,5 @@ chmod +x target/release/PrimeShield
 ### Windows
 
 ```bash
-./target/release/PrimeShield.exe
+.\target\release\PrimeShield.exe
 ```

@@ -68,8 +68,8 @@ pub fn exponential_fast_mod(g: u64, x: u64, modu: u64) -> u64 {
         if x & 1 == 1 {
             output = (output * aux) % modu;
         }
-        x >>= 1;
-        aux = (aux * aux) % modu;
+        x >>= 1; // Opération de division par 2
+        aux = (aux * aux) % modu; // Mise à jour de la base
     }
     return output;
 }
@@ -83,4 +83,19 @@ pub fn exponential_fast_mod(g: u64, x: u64, modu: u64) -> u64 {
 /// * `true` si `e` est premier avec (p − 1)(q − 1), `false` sinon
 pub fn e_is_prime_with(e: u64, p: u64, q: u64) -> bool {
     return are_coprime(e, (p - 1) * (q - 1));
+}
+
+/// Calcule l'inverse modulaire de e modulo phi
+/// # Arguments
+/// * `e` - Le nombre à inverser
+/// * `phi` - Le modulo
+/// # Returns
+/// * L'inverse modulaire de e modulo phi
+pub fn mod_inverse(e: u64, phi: u64) -> u64 {
+    for d in 1..phi {
+        if (e * d) % phi == 1 {
+            return d;
+        }
+    }
+    return 0; // Si l'inverse modulaire n'existe pas
 }

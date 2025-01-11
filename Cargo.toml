@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 repository = "https://github.com/Maxime-Cllt/PrimeShield.git"
 authors = ["Maxime-Cllt", "Sudo Rahman"]
+description = "Une implémentation de l'algorithme RSA en Rust, simulant un échange d'informations sécurisé entre deux utilisateurs."
 
 [dependencies]
 rand = "0"

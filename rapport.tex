@@ -1,0 +1,322 @@
+%! Author = maximecolliat
+%! Date = 10/01/2025
+
+% Preamble
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+% Document
+\begin{document}
+
+    \section{Introduction}\label{sec:introduction}
+
+    \subsection{Objectifs}\label{subsec:objectifs}
+
+    L'objectif principal de ce projet est de développer une implémentation pratique et pédagogique de la procédure de signature RSA, en s'appuyant sur plusieurs \("\)briques élémentaires\("\) essentielles :
+
+    \begin{enumerate}
+        \item Exponentiation rapide : Un algorithme efficace pour calculer les puissances modulaires, une opération clé dans les systèmes cryptographiques.
+        \item Test de primalité : Une méthode probabiliste pour déterminer si un nombre est premier, étape essentielle pour générer des clés RSA fiables.
+        \item Test de primalité relative : Utilisation de l'algorithme d'Euclide pour vérifier si deux nombres sont relativement premiers.
+        \item Génération de nombres premiers : Une procédure probabiliste pour produire des nombres premiers nécessaires à la création des clés RSA\@.
+        \item Inverse modulaire : Un calcul indispensable pour obtenir les clés privées utilisées dans le protocole RSA\@.
+    \end{enumerate}
+
+    En combinant ces éléments, nous serons en mesure de réaliser les trois étapes clés du protocole RSA : génération de clés, signature et authentification.
+
+    Nous avons choisi nommer ce projet \("\)PrimeShield\("\) (Bouclier Premier) pour refléter l'importance des nombres premiers dans la sécurité des systèmes cryptographiques.
+    Nous avons choisi d'implémenter ces fonctionnalités en utilisant le langage de programmation Rust, en raison de sa sécurité, de sa haute performance (equivalent à C/C++) et de sa facilité d'utilisation.
+
+
+    \section{Exponentiation Rapide}\label{sec:exponentiation-rapide}
+
+    \subsection{Définition}\label{subsec:definition}
+
+    L'exponentiation rapide est une technique efficace pour calculer les puissances modulaires de grands nombres.
+    L'algorithme consiste à décomposer l'exposant en une somme de puissances de 2, ce qui permet de réduire le nombre d'opérations nécessaires pour effectuer le calcul.
+    En utilisant cette méthode, nous pouvons calculer $g^x \mod n$ de manière rapide et efficace, ce qui est essentiel pour les opérations cryptographiques.
+
+    \subsection{Implémentation}\label{subsec:implementation}
+
+    Nous avons implémenté l'algorithme d'exponentiation rapide en utilisant une approche itérative pour calculer les puissances modulaires.
+
+    \lstset{language=Rust}
+    \begin{lstlisting}[caption={Fonction exponentiation rapide modulaire (Rust)}, label={lst:rust_exponential_fast_mod}]
+    pub fn exponential_fast_mod(g: u64, x: u64, modu: u64) -> u64 {
+    let mut aux: u64 = g % modu; // Base initiale mod n
+    let mut output: u64 = 1;
+    let mut x: u64 = x;
+
+    while x != 0 {
+    if x & 1 == 1 {
+    output = (output * aux) % modu;
+    }
+    x >>= 1; // Opération de division par 2
+    aux = (aux * aux) % modu; // Mise à jour de la base
+    }
+    return output;
+    }
+\end{lstlisting}
+Cette fonction publique prend trois paramètres : la base $g$, l'exposant $x$ et le modulo $n$, et renvoie le résultat de $g^x \mod n$ sous forme d'un entier non signé 64 bits (u64).
+L'algorithme utilise une boucle itérative pour décomposer l'exposant en bits et effectuer les opérations nécessaires pour calculer la puissance modulaire.
+En utilisant cette approche, nous pouvons obtenir le résultat de l'exponentiation rapide de manière efficace et sécurisée.
+
+
+\section{Test de Primalité}\label{sec:test-de-primalite}
+
+\subsection{Définition}\label{subsec:definition}
+
+Le test de primalité est une étape cruciale dans la génération de nombres premiers pour les clés RSA\@.
+Dans notre approche, nous utilisons un test probabiliste basé sur les quatre premiers nombres premiers (2, 3, 5 et 7) pour déterminer si un nombre est pseudo-premier.
+Si le nombre passe les tests avec ces bases, il est très probablement premier, ce qui est suffisant pour nos besoins.
+
+\subsection{Implémentation}\label{subsec:implementation}
+
+Nous avons implémenté une fonction de test de primalité qui vérifie si un nombre est pseudo-premier en utilisant les bases 2, 3, 5 et 7.
+
+
+\lstset{language=Rust}
+\begin{lstlisting}[caption={Fonction de test de primalité (Rust)}, label={lst:rust_exponential_fast_mod}]
+pub fn is_probably_prime(n: u64) -> bool {
+const BASES: [u64; 4] = [2, 3, 5, 7]; // Bases utilisées pour le test de primalité
+
+if n < 2 {
+return false;
+}
+
+// Vérifie si n est divisible par une des bases (autre qu'elle-même)
+for &base in &BASES {
+if n > base && n % base == 0 {
+return false;
+}
+}
+
+// Vérifie la condition (base^(n-1) % n == 1) pour chaque base
+for &base in &BASES {
+if base < n && exponential_fast_mod(base, n - 1, n) != 1 {
+return false;
+}
+}
+
+return true;
+}
+\end{lstlisting}
+
+Cette fonction utilise les bases prédéfinies pour effectuer les tests de primalité, en vérifiant si le nombre est divisible par l'une des bases et si la condition $base^{(n-1)} \mod n = 1$ est satisfaite pour chaque base.
+Si le nombre passe ces tests, il est considéré comme pseudo-premier et la fonction renvoie vrai, sinon elle renvoie faux.
+Cette approche probabiliste est suffisante pour nos besoins et permet de générer des nombres premiers de manière efficace et sécurisée.
+
+
+\section{Test de Primalité Relative}\label{sec:test-de-primalite-relative}
+
+\subsection{Définition}\label{subsec:definition}
+
+Deux nombres entiers sont dits relativement premiers s'ils n'ont aucun diviseur commun autre que 1.
+Le test de primalité relative consiste à vérifier si le plus grand diviseur commun de deux nombres est égal à 1, ce qui implique qu'ils sont relativement premiers.
+L'algorithme d'Euclide est une méthode classique pour calculer le PGCD de deux nombres, et il est utilisé pour déterminer si deux nombres sont relativement premiers.
+
+\subsection{Implémentation}\label{subsec:implementation}
+
+Nous avons implémenté une fonction qui utilise l'algorithme d'Euclide pour calculer le PGCD de deux nombres et vérifier s'ils sont relativement premiers.
+
+\lstset{language=Rust}
+\begin{lstlisting}[caption={Fonction de test de primalité relative (Rust)}, label={lst:rust_exponential_fast_mod}]
+pub fn pgcd(a: u64, b: u64) -> u64
+{
+let mut a: u64 = a;
+let mut b: u64 = b;
+while b != 0 {
+let r: u64 = a % b;
+a = b;
+b = r;
+}
+return a;
+}
+
+pub fn are_coprime(a: u64, b: u64) -> bool {
+return pgcd(a, b) == 1;
+}
+\end{lstlisting}
+
+La fonction \texttt{pgcd} calcule le PGCD de deux nombres en utilisant l'algorithme d'Euclide, tandis que la fonction \texttt{are\_coprime} vérifie si les deux nombres sont relativement premiers en comparant leur PGCD à 1.
+Si le PGCD est égal à 1, les nombres sont considérés comme relativement premiers et la fonction renvoie vrai, sinon elle renvoie faux.
+
+
+\section{Génération de Nombres Premiers}\label{sec:generation-de-nombres-premiers}
+
+\subsection{Définition}\label{subsec:definition}
+
+La génération de nombres premiers est une étape essentielle dans la création des clés RSA, qui nécessitent deux nombres premiers distincts pour garantir la sécurité du cryptosystème.
+Une méthode courante pour générer un nombre premier consiste à choisir un nombre aléatoire et à le tester pour la primalité, en répétant le processus jusqu'à ce qu'un nombre premier soit trouvé.
+La probabilité de trouver un nombre premier est garantie par le théorème des nombres premiers de Gauss, qui indique que le nombre de nombres premiers inférieurs à $n$ est approximativement égal à $\frac{n}{\ln n}$.
+
+\subsection{Implémentation}\label{subsec:implementation}
+
+La fonction de génération de nombres premiers en Rust utilise une approche probabiliste pour produire un nombre premier aléatoire dans un intervalle donné.
+Elle génère des nombres aléatoires entre une borne minimale et maximale, et teste chaque nombre pour la primalité jusqu'à ce qu'un nombre premier soit trouvé.
+
+\lstset{language=Rust}
+\begin{lstlisting}[caption={Fonction de génération de nombres premiers (Rust)}, label={lst:rust_exponential_fast_mod}]
+pub fn prime_gen(min: u64, max: u64) -> u64 {
+assert!(
+(min <= max),
+"Le minimum doit être inférieur ou égal au maximum"
+);
+
+let mut map_no_prime: HashMap<u64, bool> = HashMap::new();
+
+// on génère un nombre aléatoire entre min et max
+loop {
+let mut num: u64 = rand::thread_rng().gen_range(min..max);
+
+// on vérifie si le nombre generé a déjà été testé ou si on a testé tous les nombres entre min et max
+while map_no_prime.contains_key(\&num)
+\&\& map_no_prime.len() < usize::try_from(max - min).unwrap()
+{
+num = rand::thread_rng().gen_range(min..max);
+}
+
+if is_prime(num) {
+return num;
+}
+
+map_no_prime.insert(num, true); // on ajoute le nombre à la map pour ne pas le retester
+continue;
+}
+}
+\end{lstlisting}
+
+Cette fonction génère un nombre premier aléatoire dans l'intervalle spécifié, en utilisant une approche probabiliste pour garantir la probabilité de trouver un nombre premier après un nombre raisonnable d'essais.
+Elle utilise la fonction de test de primalité pour vérifier si un nombre est premier, et elle maintient une liste des nombres déjà testés pour éviter les doublons.
+Nous avons choisi d'utiliser des HashMaps pour stocker les nombres déjà testés et pour accélérer la recherche de nombres premiers.
+En effet, utiliser une HashMap permet de vérifier en temps constant si un nombre a déjà été testé, plutôt que de parcourir une liste de nombres déjà testés comme le ferait un tableau ou un vecteur.
+
+
+\section{Inverse Modulaire}\label{sec:inverse-modulaire}
+
+\subsection{Définition}\label{subsec:definition}
+
+L'inverse modulaire est une opération essentielle dans le protocole RSA, qui consiste à trouver un entier $d$ tel que $ed \equiv 1 \mod (p-1)(q-1)$.
+Pour garantir la sécurité du cryptosystème, $e$ doit être premier avec $(p-1)(q-1)$, et l'inverse modulaire de $e$ doit être calculé pour obtenir la clé privée $d$.
+Bien qu'il existe des méthodes sophistiquées pour calculer l'inverse modulaire, nous avons choisi une approche de force brute pour des raisons de simplicité et de clarté.
+
+\subsection{Implémentation}\label{subsec:implementation}
+
+Nous avons implémenté une fonction en Rust pour calculer l'inverse modulaire d'un nombre $e$ par rapport à un modulo donné $(p-1)(q-1)$.
+
+\lstset{language=Rust}
+\begin{lstlisting}[caption={Fonction de l'inverse modulaire (Rust)}, label={lst:rust_exponential_fast_mod}]
+pub fn inverse_modular(e: u64, p: u64, q: u64) -> Option<u64> {
+let modulo: u64 = (p - 1) * (q - 1);
+let always_tested: Arc<Mutex<HashMap<u64, bool>>> = Arc::new(Mutex::new(HashMap::new()));
+
+let result: Option<u64> = rayon::iter::repeat(()).find_map_any(|()| {
+let prime: u64 = prime_gen(2, u64::MAX);
+
+let mut tested: MutexGuard<HashMap<u64, bool>> = always_tested.lock().unwrap();
+if tested.contains_key(\&prime) {
+return None;
+}
+
+if are_coprime(prime, modulo)
+\&\& ((u128::from(prime)) * (u128::from(e))) % u128::from(modulo) == 1
+{
+return Some(prime);
+}
+
+tested.insert(prime, false);
+None
+});
+
+result
+}
+\end{lstlisting}
+
+\end{verbatim}
+
+Cette fonction utilise une approche probabiliste pour trouver un nombre premier $d$ qui est premier avec $(p-1)(q-1)$ et qui satisfait l'équation $ed \equiv 1 \mod (p-1)(q-1)$.
+Elle génère des nombres premiers aléatoires et vérifie s'ils sont premiers avec le modulo et s'ils satisfont l'équation d'inverse modulaire.
+Si un nombre satisfaisant est trouvé, il est renvoyé comme résultat, sinon la fonction continue à chercher jusqu'à ce qu'un nombre approprié soit trouvé.
+Nous avons utilisé la bibliothèque Rayon pour paralléliser la recherche du nombre premier, ce qui permet d'accélérer le processus de recherche en utilisant plusieurs threads pour tester les nombres premiers de manière concurrente.
+Ici aussi, nous avons utilisé une HashMap pour stocker les nombres déjà testés et éviter les doublons, en utilisant un Mutex pour garantir la sécurité de l'accès concurrentiel à la HashMap.
+
+
+\section{Documentation technique}\label{sec:documentation-technique}
+
+\subsection{Execution}\label{subsec:execution}
+
+Nous avons mis à disposition des fichiers exécutables pour différentes plateformes, vous pouvez les trouver dans le dossier \texttt{bin/} de ce projet.
+Pour exécuter le programme, il suffit de lancer l'exécutable correspondant à votre système d'exploitation.
+Il se peut que vous ayez besoin de donner les droits d'exécution à l'exécutable en utilisant la commande suivante :
+
+\lstset{language=bash}
+\begin{lstlisting}[caption={Attribution des droits d'exécution à l'exécutable}, label={lst:chmod}]
+chmod +x PrimeShield
+\end{lstlisting}
+
+\subsection{Compilation}\label{subsec:compilation}
+
+Si vous souhaitez compiler le programme vous-même, vous pouvez le faire en utilisant Cargo, le gestionnaire de paquets de Rust.
+Pour cela, il faudra avoir installé Rust et Cargo sur votre machine (voir les liens ci-dessous pour les instructions d'installation).
+
+\begin{itemize}
+\item Rust : \url{https://www.rust-lang.org/tools/install}
+\item Cargo : \url{https://doc.rust-lang.org/cargo/getting-started/installation.html}
+\end{itemize}
+
+Une fois que Rust et Cargo sont installés, vous pouvez compiler le programme en exécutant la commande suivante dans le dossier du projet :
+
+\lstset{language=bash}
+\begin{lstlisting}[caption={Compilation du programme avec Cargo}, label={lst:cargo_build}]
+cargo build --release
+\end{lstlisting}
+
+
+Cela générera un exécutable dans le dossier \texttt{target/release/} que vous pourrez exécuter.
+
+\subsection{Tests}\label{subsec:tests}
+
+Nous avons inclus des tests unitaires pour chaque fonction implémentée, afin de vérifier leur bon fonctionnement et leur conformité aux spécifications.
+Ces tests sont situés dans le fichier \texttt{src/tests/tests.rs}.
+
+Vous pouvez exécuter les tests si vous le souhaitez en utilisant la commande suivante :
+
+\lstset{language=bash}
+\begin{lstlisting}[caption={Exécution des tests unitaires avec Cargo}, label={lst:cargo_test}]
+cargo test
+\end{lstlisting}
+
+Cela lancera les tests unitaires et affichera les résultats de chaque test, en indiquant s'ils ont réussi ou échoué.
+L'intérêt de ces tests est de vérifier que les fonctions implémentées fonctionnent correctement et produisent les résultats attendus.
+
+
+\section{Bilan}\label{sec:bilan}
+
+\subsection{Synthèse}\label{subsec:synthese}
+
+Ce mini-projet nous a permis de mettre en œuvre les principaux composants de la cryptographie RSA, en utilisant des algorithmes et des techniques mathématiques fondamentales.
+Nous avons développé des fonctions pour l'exponentiation rapide, le test de primalité, le test de primalité relative, la génération de nombres premiers et le calcul de l'inverse modulaire, qui sont des éléments clés du protocole RSA\@.
+En combinant ces fonctions, nous avons pu réaliser les trois étapes essentielles du protocole RSA : génération de clés, signature et authentification, en utilisant le langage de programmation Rust pour l'implémentation.
+
+\subsection{Perspectives}\label{subsec:perspectives}
+
+Ce projet pourrait être étendu de plusieurs manières pour explorer davantage les concepts de cryptographie et de sécurité informatique :
+
+\begin{itemize}
+\item Améliorer l'efficacité des algorithmes en utilisant des méthodes plus sophistiquées pour le test de primalité et le calcul de l'inverse modulaire.
+\item Implémenter des fonctionnalités supplémentaires du protocole RSA, telles que le chiffrement et le déchiffrement des messages.
+\item Étudier les attaques cryptographiques possibles sur le protocole RSA et mettre en œuvre des contre-mesures pour renforcer la sécurité du système.
+\item Explorer d'autres algorithmes de cryptographie asymétrique et comparer leurs performances et leur sécurité avec le protocole RSA\@.
+\end{itemize}
+
+En combinant ces perspectives avec une approche pratique et pédagogique, il serait possible d'approfondir notre compréhension des systèmes cryptographiques et de renforcer nos compétences en matière de sécurité informatique.
+
+\subsection{GitHub}\label{subsec:github}
+
+Le code source de ce projet est disponible sur GitHub à l'adresse suivante : \url{git clone https://github.com/Maxime-Cllt/PrimeShield.git}
+
+
+\end{document}
