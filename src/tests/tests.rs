@@ -1,11 +1,10 @@
-use std::ops::{Mul, RemAssign};
+use std::ops::{RemAssign};
 use crate::fast_exponentiation::*;
 use crate::inverse_modular::*;
 use crate::prime_gen::*;
 use crate::utils::*;
 use num_format::{Locale, ToFormattedString};
 use std::time::Instant;
-use crypto_bigint::{U1024, U512};
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
 
@@ -101,7 +100,7 @@ fn test_inverse_modular() {
 
     println!("d: {}", d.to_formatted_string(&Locale::fr));
 
-    let ed: u128 = E * d;
+    let ed: u128 = E * u128::from(d);
     let modulo: u128 = (P - 1) * (Q - 1);
     let res: u128 = ed % modulo;
     assert_eq!(res, 1);

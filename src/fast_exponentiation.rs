@@ -1,8 +1,8 @@
-use std::ops::{DivAssign, Mul, MulAssign};
+use std::ops::{MulAssign};
 use num_bigint::BigInt;
 
 /// Exponentiation rapide : base^exponent avec base et exponent en u32
-pub fn fast_exponentiation(base: u64, exponent: u32) -> BigInt {
+pub fn fast_exponentiation(base: u128, exponent: u16) -> BigInt {
     let mut result: BigInt = BigInt::from(1u64);
     let mut base : BigInt = BigInt::from(base);
     let mut exponent: BigInt = BigInt::from(exponent);

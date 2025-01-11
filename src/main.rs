@@ -7,26 +7,26 @@ mod prime_gen;
 mod tests;
 
 use std::ops::{Rem, RemAssign};
-use crypto_bigint::{NonZero, U512};
 use crate::utils::e_is_prime_with;
 use iced::widget::container::Style;
 use iced::widget::{button, column, container, horizontal_space, row, text, text_input, vertical_space as spacer, Column};
 use iced::{Border, Center, Color, Fill, Pixels, Shadow, Size, Theme};
 use num_bigint::BigInt;
+use num_traits::ToPrimitive;
 use crate::fast_exponentiation::fast_exponentiation;
 
 struct App {
     p: u64, // bob prime number
     q: u64, // bob prime number
     modu: u64, // bob modulo
-    e: u32, // alice public key
+    e: u128, // alice public key
     d: u128, // bob private key
     n: u128, // bob public key
     message: u64, // alice message
-    encrypted_message: String, // alice encrypted message
+    encrypted_message: u64, // alice encrypted message
     decrypted_message: u64, // bob decrypted message
-    range_min: u64, // range prime gen
-    range_max: u64, // range prime gen
+    range_min: u16, // range prime gen
+    range_max: u16, // range prime gen
 }
 
 impl Default for App {
@@ -35,14 +35,14 @@ impl Default for App {
             p: 0,
             q: 0,
             modu: 0,
-            e: 0,
-            d: 0,
-            n: 0,
+            e: 5,
+            d: 5,
+            n: 21,
             message: 0,
-            encrypted_message: "".to_string(),
+            encrypted_message: 0,
             decrypted_message: 0,
             range_min: 2,
-            range_max: u64::MAX,
+            range_max: i16::MAX as u16,
         }
     }
 }
@@ -57,6 +57,7 @@ pub enum Message {
     RangeMax(String),
     Message(String),
     Encrypt,
+    Decrypt,
 }
 
 fn main() -> iced::Result {
@@ -147,7 +148,13 @@ impl App {
                                     container(text("d : ").size(20)),
                                     container(text(self.d.to_string()).size(20)).width(Fill),
                                     container(button("calculate").on_press(Message::CalculateD)),
-                                ].spacing(20)
+                                ].spacing(20),
+
+                                row![
+                                    container(text("decrypted message : ").size(20)),
+                                    container(text(self.decrypted_message.to_string()).size(20)).width(Fill),
+                                    container(button("decrypt").on_press(Message::Decrypt)),
+                                ].spacing(20),
 
                             ].spacing(20)
                         ).center_y(Fill).width(Fill).padding(10)
@@ -196,19 +203,21 @@ impl App {
     pub fn update(&mut self, message: Message) {
         match message {
             Message::GenP => {
-                self.p = prime_gen::prime_gen(self.range_min, self.range_max);
+                self.p = prime_gen::prime_gen(self.range_min as u64, self.range_max as u64);
                 self.calculate_n();
             }
             Message::GenQ => {
-                self.q = prime_gen::prime_gen(self.range_min, self.range_max);
+                self.q = prime_gen::prime_gen(self.range_min as u64, self.range_max as u64);
                 self.calculate_n();
             }
             Message::GenE => {
-                while let e = prime_gen::prime_gen(2, u16::MAX as u64) {
-                    if e_is_prime_with(u128::from(e), u128::from(self.p), u128::from(self.q)) {
-                        self.e = e as u32;
+                let mut e = 2u128;
+                loop{
+                    if e_is_prime_with(e, u128::from(self.p), u128::from(self.q)) {
+                        self.e = e;
                         break;
                     }
+                    e += 1;
                 }
             }
             Message::CalculateD => {
@@ -222,11 +231,11 @@ impl App {
                 self.range_min = nb;
             }
             Message::RangeMax(range) => {
-                let nb = range.parse().unwrap_or(u64::MAX);
-                if nb < 2 || nb <= self.range_min {
+                let nb = range.parse().unwrap_or(i16::MAX);
+                if nb < 2 || nb <= self.range_min as i16 {
                     return;
                 }
-                self.range_max = nb;
+                self.range_max = nb as u16;
             }
             Message::Message(msg) => {
                 let nb = msg.parse().unwrap_or(0);
@@ -236,13 +245,15 @@ impl App {
                 self.message = nb as u64;
             }
             Message::Encrypt => {
-                let mut exp = fast_exponentiation(u64::try_from(self.message).unwrap(), self.e);
-                println!("exp: {}", exp);
+                let mut exp = fast_exponentiation(u128::try_from(self.message).unwrap(), self.e as u16);
                 exp.rem_assign(BigInt::from(self.n));
-                println!("\nexp: {}", exp);
-                self.encrypted_message = exp.to_string();
+                self.encrypted_message = exp.to_u64().unwrap();
             }
-            _ => {}
+            Message::Decrypt => {
+                let mut exp = fast_exponentiation(u128::try_from(self.encrypted_message).unwrap(), self.d as u16);
+                exp.rem_assign(BigInt::from(self.n));
+                self.decrypted_message = exp.to_u64().unwrap();
+            }
         }
     }
 
