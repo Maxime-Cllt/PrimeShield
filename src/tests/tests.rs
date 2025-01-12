@@ -1,9 +1,12 @@
-use crate::exponential_fast::*;
+use std::ops::{RemAssign};
+use crate::fast_exponentiation::*;
 use crate::inverse_modular::*;
 use crate::prime_gen::*;
 use crate::utils::*;
 use num_format::{Locale, ToFormattedString};
 use std::time::Instant;
+use num_bigint::BigInt;
+use num_traits::ToPrimitive;
 
 #[test]
 fn test_pgcd() {
@@ -23,11 +26,16 @@ fn test_are_co_prime() {
 
 #[test]
 fn test_exponential_fast() {
-    assert_eq!(exponential_fast(2, 0), 1);
-    assert_eq!(exponential_fast(2, 1), 2);
-    assert_eq!(exponential_fast(2, 2), 4);
-    assert_eq!(exponential_fast(2, 3), 8);
-    assert_eq!(exponential_fast(2, 4), 16);
+
+    assert_eq!(fast_exponentiation(2, 0), BigInt::from(1u64));
+    assert_eq!(fast_exponentiation(2, 1),  BigInt::from(2u64));
+    assert_eq!(fast_exponentiation(2, 2), BigInt::from(4u64));
+    assert_eq!(fast_exponentiation(2, 3), BigInt::from(8u64));
+    assert_eq!(fast_exponentiation(2, 4), BigInt::from(16u64));
+
+    let mut exp = fast_exponentiation(3, 4);
+    exp.rem_assign(BigInt::from(10u8));
+    assert_eq!(exp.to_u32().unwrap(), 1);
 }
 
 #[test]
@@ -82,7 +90,7 @@ fn test_inverse_modular() {
     const Q: u128 = 11u128;
 
     let start: Instant = Instant::now();
-    let d: Option<u64> = inverse_modular(
+    let d: u128 = inverse_modular(
         u64::try_from(E).unwrap(),
         u64::try_from(P).unwrap(),
         u64::try_from(Q).unwrap(),
@@ -92,12 +100,9 @@ fn test_inverse_modular() {
         start.elapsed()
     );
 
-    assert!(d.is_some());
-
-    let d: u128 = u128::from(d.unwrap());
     println!("d: {}", d.to_formatted_string(&Locale::fr));
 
-    let ed: u128 = E * d;
+    let ed: u128 = E * u128::from(d);
     let modulo: u128 = (P - 1) * (Q - 1);
     let res: u128 = ed % modulo;
     assert_eq!(res, 1);
