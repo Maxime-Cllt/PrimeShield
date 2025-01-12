@@ -68,11 +68,6 @@ pub enum Message {
 }
 
 fn main() -> iced::Result {
-
-    // Initialiser le runtime tokio
-    let runtime = tokio::runtime::Runtime::new().unwrap();
-    let _guard = runtime.enter();
-
     iced::application("RSA", App::update, App::view)
         .transparent(true)
         .window_size(Size::new(800.0, 600.0))
