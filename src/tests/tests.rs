@@ -89,11 +89,12 @@ fn test_inverse_modular() {
     const P: u128 = 5u128;
     const Q: u128 = 11u128;
 
+    let phi_n: u128 = (P - 1) * (Q - 1);
+
     let start: Instant = Instant::now();
     let d: u128 = inverse_modular(
         u64::try_from(E).unwrap(),
-        u64::try_from(P).unwrap(),
-        u64::try_from(Q).unwrap(),
+        phi_n,
     );
     println!(
         "Temps écoulé en inverse_modular() est: {:?}",
@@ -103,8 +104,7 @@ fn test_inverse_modular() {
     println!("d: {}", d.to_formatted_string(&Locale::fr));
 
     let ed: u128 = E * u128::from(d);
-    let modulo: u128 = (P - 1) * (Q - 1);
-    let res: u128 = ed % modulo;
+    let res: u128 = ed % phi_n;
     assert_eq!(res, 1);
 }
 

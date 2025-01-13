@@ -6,19 +6,20 @@ mod prime_gen;
 #[cfg(test)]
 mod tests;
 
-use std::ops::{Rem, RemAssign};
-use crate::utils::e_is_prime_with;
+use crate::fast_exponentiation::{fast_exponentiation, parallel_fast_exponentiation};
+use crate::utils::are_coprime;
 use iced::widget::container::Style;
 use iced::widget::{button, column, container, horizontal_space, row, text, text_input, vertical_space as spacer, Column};
-use iced::{Border, Center, Color, Fill, Pixels, Shadow, Size, Theme};
+use iced::{Border, Center, Color, Fill, Pixels, Shadow, Size, Task, Theme};
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
-use crate::fast_exponentiation::fast_exponentiation;
+use std::ops::{Rem, RemAssign};
+use std::u128;
 
 struct App {
     p: u64, // bob prime number
     q: u64, // bob prime number
-    modu: u64, // bob modulo
+    phi_n: u128, // bob modulo
     e: u128, // alice public key
     d: u128, // bob private key
     n: u128, // bob public key
@@ -26,7 +27,9 @@ struct App {
     encrypted_message: u64, // alice encrypted message
     decrypted_message: u64, // bob decrypted message
     range_min: u16, // range prime gen
-    range_max: u16, // range prime gen
+    range_max: u16, // range prime gen,
+    progress_d: bool,
+    progress_decrypt: bool,
 }
 
 impl Default for App {
@@ -34,15 +37,17 @@ impl Default for App {
         Self {
             p: 0,
             q: 0,
-            modu: 0,
-            e: 5,
-            d: 5,
-            n: 21,
+            phi_n: 0,
+            e: 0,
+            d: 0,
+            n: 0,
             message: 0,
             encrypted_message: 0,
             decrypted_message: 0,
             range_min: 2,
             range_max: i16::MAX as u16,
+            progress_d: false,
+            progress_decrypt: false,
         }
     }
 }
@@ -53,19 +58,16 @@ pub enum Message {
     GenQ,
     GenE,
     CalculateD,
+    CalculateDFinished(u128),
     RangeMin(String),
     RangeMax(String),
     Message(String),
     Encrypt,
     Decrypt,
+    DecryptedMessage(u64),
 }
 
 fn main() -> iced::Result {
-
-    // Initialiser le runtime tokio
-    let runtime = tokio::runtime::Runtime::new().unwrap();
-    let _guard = runtime.enter();
-
     iced::application("RSA", App::update, App::view)
         .transparent(true)
         .window_size(Size::new(800.0, 600.0))
@@ -73,9 +75,9 @@ fn main() -> iced::Result {
         .run()
 }
 
+
 impl App {
     pub fn view(&self) -> Column<Message> {
-
         column![
             container( text("RSA").size(50)).center_x(Fill),
             spacer().height(Pixels(20.0)),
@@ -138,6 +140,11 @@ impl App {
                                     container(button("generate").on_press(Message::GenQ)),
                                 ].spacing(20),
 
+                                   row![
+                                    container(text("(p-1)(q-1) : ").size(20)),
+                                    container(text(self.phi_n.to_string()).size(20)).width(Fill),
+                                ].spacing(20),
+
                                 row![
                                     container(text("e : ").size(20)),
                                     container(text(self.e.to_string()).size(20)).width(Fill),
@@ -147,13 +154,17 @@ impl App {
                                  row![
                                     container(text("d : ").size(20)),
                                     container(text(self.d.to_string()).size(20)).width(Fill),
-                                    container(button("calculate").on_press(Message::CalculateD)),
+                                    container(button(if self.progress_d {"calculating..."} else {"calculate"}).on_press_maybe(
+                                        if self.progress_d {None} else {Some(Message::CalculateD)}
+                                    )),
                                 ].spacing(20),
 
                                 row![
                                     container(text("decrypted message : ").size(20)),
                                     container(text(self.decrypted_message.to_string()).size(20)).width(Fill),
-                                    container(button("decrypt").on_press(Message::Decrypt)),
+                                    container(button(if self.progress_decrypt {"decrypting..."} else {"decrypt"}).on_press_maybe(
+                                        if self.progress_decrypt {None} else {Some(Message::Decrypt)}
+                                    )),
                                 ].spacing(20),
 
                             ].spacing(20)
@@ -200,7 +211,7 @@ impl App {
         ].padding(20)
     }
 
-    pub fn update(&mut self, message: Message) {
+    pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
             Message::GenP => {
                 self.p = prime_gen::prime_gen(self.range_min as u64, self.range_max as u64);
@@ -212,8 +223,8 @@ impl App {
             }
             Message::GenE => {
                 let mut e = 2u128;
-                loop{
-                    if e_is_prime_with(e, u128::from(self.p), u128::from(self.q)) {
+                loop {
+                    if are_coprime(e, self.phi_n) {
                         self.e = e;
                         break;
                     }
@@ -221,44 +232,87 @@ impl App {
                 }
             }
             Message::CalculateD => {
-                self.d = inverse_modular::inverse_modular(u64::try_from(self.e).unwrap(), u64::try_from(self.p).unwrap(), u64::try_from(self.q).unwrap());
+                let e = self.e;
+                let phi_n = self.phi_n;
+                self.progress_d = true;
+                return Task::future(async move {
+                    let d = tokio::task::spawn_blocking(move || {
+                        println!("Calculating d...");
+                        inverse_modular::inverse_modular(u64::try_from(e).unwrap(), phi_n)
+                    })
+                        .await
+                        .unwrap();
+
+                    // Send the information back to the update function
+                    Message::CalculateDFinished(d)
+                });
             }
             Message::RangeMin(range) => {
                 let nb = range.parse().unwrap_or(2);
                 if nb < 2 || nb >= self.range_max {
-                    return;
+                    return Task::none();
                 }
                 self.range_min = nb;
             }
             Message::RangeMax(range) => {
                 let nb = range.parse().unwrap_or(i16::MAX);
                 if nb < 2 || nb <= self.range_min as i16 {
-                    return;
+                    return Task::none();
                 }
                 self.range_max = nb as u16;
             }
             Message::Message(msg) => {
                 let nb = msg.parse().unwrap_or(0);
                 if nb >= self.n {
-                    return;
+                    return Task::none();
                 }
                 self.message = nb as u64;
             }
             Message::Encrypt => {
-                let mut exp = fast_exponentiation(u128::try_from(self.message).unwrap(), self.e as u16);
+                let mut exp = fast_exponentiation(u128::try_from(self.message).unwrap(), self.e as u32);
                 exp.rem_assign(BigInt::from(self.n));
                 self.encrypted_message = exp.to_u64().unwrap();
+                return Task::none();
             }
             Message::Decrypt => {
-                let mut exp = fast_exponentiation(u128::try_from(self.encrypted_message).unwrap(), self.d as u16);
-                exp.rem_assign(BigInt::from(self.n));
-                self.decrypted_message = exp.to_u64().unwrap();
+                let encrypted_message = self.encrypted_message.clone();
+                let d = self.d;
+                let n = self.n.clone();
+                self.progress_decrypt = true;
+
+                return Task::future(async move {
+                    let information = tokio::task::spawn_blocking(move || {
+                        println!("Decrypting message...");
+                        let mut exp = parallel_fast_exponentiation(u128::try_from(encrypted_message).unwrap(), d as u32);
+                        exp.rem_assign(BigInt::from(n));
+                        exp.to_u64().unwrap_or(0)
+                    })
+                        .await
+                        .unwrap();
+
+                    // Send the information back to the update function
+                    Message::DecryptedMessage(information)
+                });
+            }
+            Message::DecryptedMessage(msg) => {
+                self.decrypted_message = msg;
+                self.progress_decrypt = false;
+                return Task::none();
+            }
+            Message::CalculateDFinished(d) => {
+                self.d = d;
+                self.progress_d = false;
+                return Task::none();
             }
         }
+        Task::none()
     }
 
     fn calculate_n(&mut self) {
         self.n = u128::from(self.p) * u128::from(self.q);
+        if self.p > 0 && self.q > 0 {
+            self.phi_n = (u128::from(self.p) - 1) * (u128::from(self.q) - 1);
+        }
     }
 
     fn theme(&self) -> Theme {

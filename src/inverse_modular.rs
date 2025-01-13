@@ -1,29 +1,27 @@
 use crate::prime_gen::{PrimeGen};
-use crate::utils::are_coprime;
 use rayon::prelude::*;
-use std::sync::{Arc, Mutex};
+use std::u128;
 
-/// Calcule l'inverse modulaire de `e` modulo `(p-1)*(q-1)`
-/// # Arguments
-/// * `e` - Le nombre à inverser
-/// * `p` - Le premier nombre
-/// * `q` - Le deuxième nombre
-/// # Returns
-/// * `Some(u64)` si l'inverse modulaire existe, `None` sinon
-pub fn inverse_modular(e: u64, p: u64, q: u64) -> u128 {
-    let modulo: u128 = (u128::from(p) - 1) * (u128::from(q) - 1);
-    let val: Arc<Mutex<u128>> = Arc::new(Mutex::new(2u128));
+pub fn inverse_modular(e: u64, phi_n: u128) -> u128 {
+    // Nous allons diviser l'espace de recherche en plusieurs parties
+    let num_threads = rayon::current_num_threads() as u128;
+    let chunk_size = u128::from(u64::MAX) / num_threads;
 
-    rayon::iter::repeat(()).find_map_any(|()| {
-        let test = val.lock().unwrap().clone();
-        *val.lock().unwrap() += 1;
+    // Utilisation de `par_iter` pour parcourir les chunks en parallèle
+    (0..num_threads).into_par_iter().find_map_any(|i| {
+        let start = i * chunk_size + 2; // Commencer à partir de 2
+        let end = if i == num_threads - 1 {
+            phi_n // Le dernier chunk peut être plus grand
+        } else {
+            (i + 1) * chunk_size
+        };
 
-        if are_coprime(u128::from(test), u128::from(modulo))
-            && ((u128::from(test)) * (u128::from(e))) % u128::from(modulo) == 1
-        {
-            return Some(test);
+        // Recherche de l'inverse modulaire dans le chunk courant
+        for d in start..=end {
+            if (d * e as u128) % phi_n == 1 {
+                return Some(d);
+            }
         }
-
         None
-    }).unwrap_or_else(|| panic!("No prime number found in range"))
+    }).unwrap_or_else(|| panic!("No modular inverse found"))
 }
