@@ -1,34 +1,42 @@
 # PrimeShield - Projet de Sécurité des Données
 
-PrimeShield est un projet de sécurité des données utilisant les primitives cryptographiques classiques. Le but de ce
-mini-projet est de mettre en œuvre plusieurs éléments de la cryptographie, comme l'exponentiation rapide, le test de
-primalité, la génération de nombres premiers, l'inverse modulaire, et de construire une procédure de signature RSA
-complète. L'implémentation est réalisée en Rust, un langage de programmation moderne qui garantit la
-sécurité et la fiabilité du code, tout en apportant une haute performance.
+PrimeShield est un projet axé sur la sécurité des données, mettant en œuvre des primitives cryptographiques classiques.
+Ce mini-projet utilise **Rust**, un langage moderne et performant, pour garantir un code sûr, fiable et optimisé.
 
-Retrouvez un exécutable du programme pour votre système d'exploitation dans la
+Le projet explore des concepts clés de la cryptographie mathématique tels que l'exponentiation rapide, les tests de
+primalité, la génération de nombres premiers, l'inverse modulaire et la construction d'une procédure complète de
+signature RSA.
+
+👉 Retrouvez l'exécutable pour votre système d'exploitation dans la
 section [Releases](https://github.com/Maxime-Cllt/PrimeShield/releases).
 
-## Description
+---
 
-Ce projet implémente des primitives cryptographiques utilisées dans des protocoles comme RSA, avec un accent particulier
-sur les tests de primalité et l'inverse modulaire. L'objectif est de démontrer l'utilisation des méthodes mathématiques
-pour garantir la sécurité des communications.
+## 📝 Description
 
-Les principales étapes incluent :
+PrimeShield implémente des primitives cryptographiques essentielles utilisées dans des protocoles comme **RSA**, avec
+une attention particulière portée sur la sécurité mathématique.
 
-1. **Exponentiation rapide** : Calcul de \( g^x \mod n \) pour trois entiers donnés \( g \), \( x \) et \( n \).
-2. **Test de primalité** : Vérification probabiliste si un nombre \( p \) est premier.
-3. **Test de primalité relative** : Utilisation de l'algorithme d'Euclide pour déterminer si deux entiers sont premiers
-   entre eux.
-4. **Génération de nombres premiers** : Génération d'un nombre premier aléatoire inférieur à une certaine valeur \(
-   n \).
-5. **Inverse modulaire** : Calcul de l'inverse modulaire utilisé dans le protocole RSA pour la signature et l'
-   authentification.
+Les principales fonctionnalités du projet incluent :
 
-## Plateformes
+1. **Exponentiation rapide** : Calcul efficace de \( g^x \mod n \).
+2. **Test de primalité** : Vérification probabiliste si un nombre est premier.
+3. **Primalité relative** : Utilisation de l'algorithme d'Euclide pour déterminer si deux entiers sont premiers entre
+   eux.
+4. **Génération de nombres premiers** : Génération aléatoire de nombres premiers inférieurs à une valeur donnée.
+5. **Inverse modulaire** : Calcul de l'inverse modulaire, une étape cruciale pour la signature RSA et
+   l'authentification.
 
-PrimeShield fonctionne sur les plateformes suivantes :
+### 🚀 Objectif
+
+L'objectif principal est de démontrer comment les primitives cryptographiques peuvent être mises en œuvre efficacement
+pour sécuriser les communications numériques.
+
+---
+
+## 💻 Plateformes Compatibles
+
+PrimeShield est compatible avec les systèmes d'exploitation suivants :
 
 <div align="center">
     <img src="https://img.shields.io/badge/OS-MacOS-informational?style=flat&logo=apple&logoColor=white&color=007aff" alt="MacOS" />
@@ -36,27 +44,34 @@ PrimeShield fonctionne sur les plateformes suivantes :
     <img src="https://img.shields.io/badge/OS-Windows-informational?style=flat&logo=windows&logoColor=white&color=1e90ff" alt="Windows" />
 </div>
 
-### Pré-requis
+---
 
-Le projet nécessite les outils suivants :
+## ⚙️ Pré-requis
+
+Avant de commencer, assurez-vous d’avoir les éléments suivants installés :
 
 - **Rust** : Version 1.83 ou supérieure.
-- **Cargo** : Outil de gestion de dépendances et de compilation pour Rust.
+- **Cargo** : Gestionnaire de dépendances et outil de compilation pour Rust.
 
 <div align="center">
-<img src="https://img.shields.io/badge/Rust-1.83+-informational?style=flat&logo=rust&logoColor=white&color=53a863" alt="Rust" />
-<img src="https://img.shields.io/badge/Cargo-informational?style=flat&logo=rust&logoColor=white&color=53a863" alt="Cargo" />
+    <img src="https://img.shields.io/badge/Rust-1.83+-informational?style=flat&logo=rust&logoColor=white&color=53a863" alt="Rust" />
+    <img src="https://img.shields.io/badge/Cargo-informational?style=flat&logo=rust&logoColor=white&color=53a863" alt="Cargo" />
 </div>
 
-## Installation
+👉 Si Rust et Cargo ne sont pas installés,
+consultez [la documentation officielle](https://www.rust-lang.org/tools/install) pour les installer.
 
-Pour exécuter le programme, vous devez avoir Rust et Cargo installés sur votre machine. Si ce n'est pas le cas, vous
-pouvez les installer en suivant les instructions sur le site officiel de Rust.
+---
 
-1. Clonez le dépôt :
+## 📦 Installation
+
+Suivez ces étapes pour configurer et exécuter PrimeShield :
+
+1. **Clonez le dépôt :**
 
 ```bash
 git clone https://github.com/Maxime-Cllt/PrimeShield.git
+cd PrimeShield
 ```
 
 2. Compiler le programme:

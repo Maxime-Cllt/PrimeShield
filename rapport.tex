@@ -44,22 +44,24 @@
     Nous avons implémenté l'algorithme d'exponentiation rapide en utilisant une approche itérative pour calculer les puissances modulaires.
 
     \lstset{language=Rust}
-    \begin{lstlisting}[caption={Fonction exponentiation rapide modulaire (Rust)}, label={lst:rust_exponential_fast_mod}]
-    pub fn exponential_fast_mod(g: u64, x: u64, modu: u64) -> u64 {
-    let mut aux: u64 = g % modu; // Base initiale mod n
-    let mut output: u64 = 1;
-    let mut x: u64 = x;
+    \begin{lstlisting}[caption={Fonction d'exponentiation rapide (Rust)}, label={lst:rust_exponential_fast_mod}]
+    pub fn exponential_fast_mod(g: u64, x: u64, n: u64) -> u64 {
+    let mut result: u64 = 1;
+    let mut base: u64 = g % n;
+    let mut exp: u64 = x;
 
-    while x != 0 {
-    if x & 1 == 1 {
-    output = (output * aux) % modu;
+    while exp > 0 {
+    if exp % 2 == 1 {
+    result = (result * base) % n;
     }
-    x >>= 1; // Opération de division par 2
-    aux = (aux * aux) % modu; // Mise à jour de la base
+    base = (base * base) % n;
+    exp /= 2;
     }
-    return output;
+
+    result
     }
 \end{lstlisting}
+
 Cette fonction publique prend trois paramètres : la base $g$, l'exposant $x$ et le modulo $n$, et renvoie le résultat de $g^x \mod n$ sous forme d'un entier non signé 64 bits (u64).
 L'algorithme utilise une boucle itérative pour décomposer l'exposant en bits et effectuer les opérations nécessaires pour calculer la puissance modulaire.
 En utilisant cette approche, nous pouvons obtenir le résultat de l'exponentiation rapide de manière efficace et sécurisée.
@@ -79,7 +81,7 @@ Nous avons implémenté une fonction de test de primalité qui vérifie si un no
 
 
 \lstset{language=Rust}
-\begin{lstlisting}[caption={Fonction de test de primalité (Rust)}, label={lst:rust_exponential_fast_mod}]
+\begin{lstlisting}[caption={Fonction de test de primalité (Rust)}, label={lst:rust\_exponential\_fast\_mod}]
 pub fn is_probably_prime(n: u64) -> bool {
 const BASES: [u64; 4] = [2, 3, 5, 7]; // Bases utilisées pour le test de primalité
 
@@ -256,6 +258,8 @@ Il se peut que vous ayez besoin de donner les droits d'exécution à l'exécutab
 \begin{lstlisting}[caption={Attribution des droits d'exécution à l'exécutable}, label={lst:chmod}]
 chmod +x PrimeShield
 \end{lstlisting}
+
+Une fois le programme lancé, une interface graphique simple s'affichera, vous permettant de choisir les différentes options pour générer les clés, signer un message et vérifier l'authenticité d'un message signé.
 
 \subsection{Compilation}\label{subsec:compilation}
 
