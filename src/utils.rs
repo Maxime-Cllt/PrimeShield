@@ -1,6 +1,3 @@
-use num_traits::{One, Unsigned, Zero};
-use std::ops::Rem;
-
 /// Calcule le PGCD de deux nombres
 /// # Arguments
 /// * `a` - Le premier nombre
