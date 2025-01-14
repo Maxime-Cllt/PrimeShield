@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex, MutexGuard};
 // on génère un nombre aléatoire entre min et max
 pub fn prime_gen(min: u64, max: u64) -> u64 {
     assert!(
-        (min <= max),
+        min <= max,
         "Le minimum doit être inférieur ou égal au maximum"
     );
 

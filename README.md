@@ -1,5 +1,10 @@
 # PrimeShield - Projet de Sécurité des Données
 
+<div align="center">
+        <img src="https://img.shields.io/badge/Rust-dea584?style=for-the-badge&logo=rust&logoColor=white" alt="Rust" />
+    <img src="https://img.shields.io/badge/Version-1.0.0-informational?style=for-the-badge" alt="Version" />
+</div>
+
 PrimeShield est un projet axé sur la sécurité des données, mettant en œuvre des primitives cryptographiques classiques.
 Ce mini-projet utilise **Rust**, un langage moderne et performant, pour garantir un code sûr, fiable et optimisé.
 
