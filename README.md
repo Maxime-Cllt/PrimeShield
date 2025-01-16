@@ -1,4 +1,6 @@
-# PrimeShield - Projet de Sécurité des Données
+<h1>
+PrimeShield - Projet de Sécurité des Données
+</h1>
 
 <div align="center">
         <img src="https://img.shields.io/badge/Rust-dea584?style=for-the-badge&logo=rust&logoColor=white" alt="Rust" />
