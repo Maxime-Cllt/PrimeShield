@@ -43,5 +43,7 @@ pub fn parallel_fast_exponentiation(base: u128, exponent: u32) -> BigInt {
         .collect();
 
     // Combiner les résultats partiels
-    partial_results.into_iter().fold(BigInt::from(1u64), |acc, x| acc * x)
+    partial_results
+        .into_iter()
+        .fold(BigInt::from(1u64), |acc, x| acc * x)
 }
