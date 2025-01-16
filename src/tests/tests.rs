@@ -103,7 +103,7 @@ async fn test_mod_inverse() {
         start.elapsed()
     );
 
-    let d: u128 = u128::from(d);
+    let d: u128 = u128::try_from(d.unwrap()).unwrap();
     println!("d: {}", d.to_formatted_string(&Locale::fr));
 
     let ed: u128 = E * d;
