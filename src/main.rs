@@ -6,18 +6,19 @@ mod prime_gen;
 #[cfg(test)]
 mod tests;
 
-use crate::fast_exponentiation::{fast_exponentiation, parallel_fast_exponentiation};
-use crate::utils::are_coprime;
+use crate::utils::{are_coprime};
+use crate::fast_exponentiation::*;
+use crate::inverse_modular::*;
 use iced::widget::container::Style;
 use iced::widget::{
     button, column, container, horizontal_space, row, text, text_input, vertical_space as spacer,
     Column,
 };
 use iced::{Border, Center, Color, Fill, Pixels, Shadow, Size, Task, Theme};
-use num_bigint::BigInt;
 use num_traits::ToPrimitive;
 use std::ops::RemAssign;
-use std::u128;
+use num_format::{Buffer, CustomFormat, Grouping, ToFormattedStr, ToFormattedString};
+use rand::{thread_rng, Rng};
 
 struct App {
     p: u64,                 // bob prime number
@@ -26,11 +27,11 @@ struct App {
     e: u128,                // alice public key
     d: u128,                // bob private key
     n: u128,                // bob public key
-    message: u64,           // alice message
-    encrypted_message: u64, // alice encrypted message
-    decrypted_message: u64, // bob decrypted message
-    range_min: u16,         // range prime gen
-    range_max: u16,         // range prime gen,
+    message: u128,           // alice message
+    encrypted_message: u128, // alice encrypted message
+    decrypted_message: u128, // bob decrypted message
+    range_min: u32,         // range prime gen
+    range_max: u32,         // range prime gen,
     progress_d: bool,
     progress_decrypt: bool,
 }
@@ -48,7 +49,7 @@ impl Default for App {
             encrypted_message: 0,
             decrypted_message: 0,
             range_min: 2,
-            range_max: i16::MAX as u16,
+            range_max: u32::MAX,
             progress_d: false,
             progress_decrypt: false,
         }
@@ -67,18 +68,36 @@ pub enum Message {
     Message(String),
     Encrypt,
     Decrypt,
-    DecryptedMessage(u64),
+    DecryptedMessage(u128),
+    FakeIt,
 }
 
 fn main() -> iced::Result {
     iced::application("RSA", App::update, App::view)
         .transparent(true)
-        .window_size(Size::new(800.0, 600.0))
-        // .theme(App::theme)
+        .window_size(Size::new(1000.0, 800.0))
+        .theme(App::theme)
         .run()
 }
 
 impl App {
+
+    const SEPARATOR: &'static str = "  ";
+
+    // format a number type T
+    fn format<T>(&self, number: &T) -> String
+    where
+        T: ToPrimitive + ToFormattedStr,
+    {
+        let format = CustomFormat::builder().grouping(Grouping::Standard)
+        .separator(Self::SEPARATOR)
+        .build().expect("Invalid format");
+
+        let mut buf = Buffer::new();
+        buf.write_formatted(number, &format);
+        buf.as_str().to_string()
+    }
+
     pub fn view(&self) -> Column<Message> {
         column![
             container(text("RSA").size(50)).center_x(Fill),
@@ -103,9 +122,10 @@ impl App {
                             .spacing(20),
                             row![
                                 container(text("encrypted message : ").size(20)).align_y(Center),
-                                container(text(&self.encrypted_message).size(20))
+                                container(text(self.format(&self.encrypted_message)).size(20))
                                     .width(Fill)
                                     .align_y(Center),
+                                container(button("fake it").on_press(Message::FakeIt)),
                             ]
                             .spacing(20),
                         ]
@@ -158,30 +178,30 @@ impl App {
                             .spacing(20),
                             row![
                                 container(text("p : ").size(20)),
-                                container(text(self.p.to_string()).size(20)).width(Fill),
+                                container(text(self.format(&self.p)).size(20)).width(Fill),
                                 container(button("generate").on_press(Message::GenP)),
                             ]
                             .spacing(20),
                             row![
                                 container(text("q : ").size(20)),
-                                container(text(self.q.to_string()).size(20)).width(Fill),
+                                container(text(self.format(&self.q)).size(20)).width(Fill),
                                 container(button("generate").on_press(Message::GenQ)),
                             ]
                             .spacing(20),
                             row![
                                 container(text("(p-1)(q-1) : ").size(20)),
-                                container(text(self.phi_n.to_string()).size(20)).width(Fill),
+                                container(text(self.format(&self.phi_n)).size(20)).width(Fill),
                             ]
                             .spacing(20),
                             row![
                                 container(text("e : ").size(20)),
-                                container(text(self.e.to_string()).size(20)).width(Fill),
+                                container(text(self.format(&self.e)).size(20)).width(Fill),
                                 container(button("generate").on_press(Message::GenE)),
                             ]
                             .spacing(20),
                             row![
                                 container(text("d : ").size(20)),
-                                container(text(self.d.to_string()).size(20)).width(Fill),
+                                container(text(self.format(&self.d)).size(20)).width(Fill),
                                 container(
                                     button(if self.progress_d {
                                         "calculating..."
@@ -200,7 +220,7 @@ impl App {
                             .spacing(20),
                             row![
                                 container(text("decrypted message : ").size(20)),
-                                container(text(self.decrypted_message.to_string()).size(20))
+                                container(text(self.format(&self.decrypted_message)).size(20))
                                     .width(Fill),
                                 container(
                                     button(if self.progress_decrypt {
@@ -223,7 +243,18 @@ impl App {
                     )
                     .center_y(Fill)
                     .width(Fill)
-                    .padding(10)
+                    .padding(10),
+                    container(
+                        if self.decrypted_message != 0{
+                            if self.decrypted_message != self.message {
+                                text("Decryption failed".to_string()).color(Color::new(1.0, 0.0, 0.0, 1.0))
+                            } else {
+                                text("Decryption success".to_string()).color(Color::new(0.0, 1.0, 0.0, 1.0))
+                            }
+                        } else {
+                            text("".to_string())
+                        }
+                    )
                 ],)
                 .center_x(Fill)
                 .width(Fill)
@@ -253,17 +284,17 @@ impl App {
                     column![
                         row![
                             container(text("e : ").size(20)),
-                            container(text(self.e.to_string()).size(20)),
+                            container(text(self.format(&self.e)).size(20)),
                         ]
                         .spacing(20),
                         row![
                             container(text("n : ").size(20)),
-                            container(text(self.n.to_string()).size(20)),
+                            container(text(self.format(&self.n)).size(20)),
                         ]
                         .spacing(20),
                         row![
                             container(text("encrypted message : ").size(20)),
-                            container(text(&self.encrypted_message).size(20)),
+                            container(text(self.format(&self.encrypted_message)).size(20)),
                         ]
                         .spacing(20),
                     ]
@@ -315,13 +346,20 @@ impl App {
                 }
             }
             Message::CalculateD => {
+                if self.e==0 || self.phi_n==0 {
+                    return Task::none();
+                }
                 let e = self.e;
                 let phi_n = self.phi_n;
                 self.progress_d = true;
                 return Task::future(async move {
                     let d = tokio::task::spawn_blocking(move || {
                         println!("Calculating d...");
-                        inverse_modular::inverse_modular(u64::try_from(e).unwrap(), phi_n)
+                        let res = inverse_modular_fast(e,phi_n);
+                        match res {
+                            Some(d) => d,
+                            None => panic!("No modular inverse found")
+                        }
                     })
                     .await
                     .unwrap();
@@ -331,6 +369,7 @@ impl App {
                 });
             }
             Message::RangeMin(range) => {
+                let range = range.replace(Self::SEPARATOR, "");
                 let nb = range.parse().unwrap_or(2);
                 if nb < 2 || nb >= self.range_max {
                     return Task::none();
@@ -338,24 +377,23 @@ impl App {
                 self.range_min = nb;
             }
             Message::RangeMax(range) => {
-                let nb = range.parse().unwrap_or(i16::MAX);
-                if nb < 2 || nb <= self.range_min as i16 {
+                let range = range.replace(Self::SEPARATOR, "");
+                let nb = range.parse().unwrap_or(u32::MAX);
+                if nb < 2 || nb <= self.range_min{
                     return Task::none();
                 }
-                self.range_max = nb as u16;
+                self.range_max = nb;
             }
             Message::Message(msg) => {
+                let msg = msg.replace(Self::SEPARATOR, "");
                 let nb = msg.parse().unwrap_or(0);
                 if nb >= self.n {
                     return Task::none();
                 }
-                self.message = nb as u64;
+                self.message = nb;
             }
             Message::Encrypt => {
-                let mut exp =
-                    fast_exponentiation(u128::try_from(self.message).unwrap(), self.e as u32);
-                exp.rem_assign(BigInt::from(self.n));
-                self.encrypted_message = exp.to_u64().unwrap();
+                self.encrypted_message = exponential_fast_mod(self.message, self.e as u64, self.n);
                 return Task::none();
             }
             Message::Decrypt => {
@@ -367,12 +405,7 @@ impl App {
                 return Task::future(async move {
                     let information = tokio::task::spawn_blocking(move || {
                         println!("Decrypting message...");
-                        let mut exp = parallel_fast_exponentiation(
-                            u128::try_from(encrypted_message).unwrap(),
-                            d as u32,
-                        );
-                        exp.rem_assign(BigInt::from(n));
-                        exp.to_u64().unwrap_or(0)
+                        exponential_fast_mod(encrypted_message, d as u64, n)
                     })
                     .await
                     .unwrap();
@@ -391,6 +424,9 @@ impl App {
                 self.progress_d = false;
                 return Task::none();
             }
+            Message::FakeIt => {
+                self.encrypted_message+= thread_rng().gen_range(1..u32::MAX) as u128;
+            }
         }
         Task::none()
     }
@@ -403,6 +439,6 @@ impl App {
     }
 
     fn theme(&self) -> Theme {
-        Theme::Dark
+        Theme::CatppuccinMacchiato
     }
 }

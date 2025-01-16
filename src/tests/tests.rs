@@ -2,10 +2,7 @@ use crate::fast_exponentiation::*;
 use crate::inverse_modular::*;
 use crate::prime_gen::*;
 use crate::utils::*;
-use num_bigint::BigInt;
 use num_format::{Locale, ToFormattedString};
-use num_traits::ToPrimitive;
-use std::ops::RemAssign;
 use std::time::Instant;
 
 #[tokio::test]
@@ -22,19 +19,6 @@ async fn test_are_co_prime() {
     assert!(are_coprime(12, 35));
     assert!(are_coprime(12, 37));
     assert!(!are_coprime(12, 39));
-}
-
-#[tokio::test]
-async fn test_exponential_fast() {
-    assert_eq!(fast_exponentiation(2, 0), BigInt::from(1u64));
-    assert_eq!(fast_exponentiation(2, 1), BigInt::from(2u64));
-    assert_eq!(fast_exponentiation(2, 2), BigInt::from(4u64));
-    assert_eq!(fast_exponentiation(2, 3), BigInt::from(8u64));
-    assert_eq!(fast_exponentiation(2, 4), BigInt::from(16u64));
-
-    let mut exp = fast_exponentiation(3, 4);
-    exp.rem_assign(BigInt::from(10u8));
-    assert_eq!(exp.to_u32().unwrap(), 1);
 }
 
 #[tokio::test]
@@ -111,9 +95,8 @@ async fn test_mod_inverse() {
     const Q: u128 = 11u128;
 
     let start: Instant = Instant::now();
-    let d: u64 = mod_inverse(
-        u64::try_from(E).unwrap(),
-        u64::try_from((P - 1) * (Q - 1)).unwrap(),
+    let d: Option<u128> = inverse_modular_fast(
+        E, (P - 1) * (Q - 1),
     );
     println!(
         "Temps écoulé en test_mod_inverse() est: {:?}",
@@ -127,4 +110,21 @@ async fn test_mod_inverse() {
     let modulo: u128 = (P - 1) * (Q - 1);
     let res: u128 = ed % modulo;
     assert_eq!(res, 1);
+}
+
+
+#[tokio::test]
+async fn fast_exponentiation_fn_test() {
+    let base: u128 = 106_190;
+    let exponent: u32 = 119_863;
+    let modulo = 839_040;
+
+    let mut  start: Instant = Instant::now();
+
+    let res = exponential_fast_mod(base, exponent as u64, modulo);
+
+    println!(
+        "Temps écoulé en fast_exponentiation_fn_test() est: {:?} {:?}",
+        start.elapsed(), res
+    );
 }

@@ -1,3 +1,5 @@
+use crate::fast_exponentiation::exponential_fast_mod;
+
 /// Calcule le PGCD de deux nombres
 /// # Arguments
 /// * `a` - Le premier nombre
@@ -29,7 +31,9 @@ pub fn are_coprime(a: u128, b: u128) -> bool {
 /// # Returns
 /// * `true` si `n` est probablement premier, `false` sinon
 pub fn is_probably_prime(n: u64) -> bool {
-    const BASES: [u64; 4] = [2, 3, 5, 7]; // Bases utilisées pour le test de primalité
+
+    let n = n as u128;
+    const BASES: [u128; 4] = [2, 3, 5, 7]; // Bases utilisées pour le test de primalité
 
     if n < 2 {
         return false;
@@ -44,34 +48,12 @@ pub fn is_probably_prime(n: u64) -> bool {
 
     // Vérifie la condition (base^(n-1) % n == 1) pour chaque base
     for &base in &BASES {
-        if base < n && exponential_fast_mod(base, n - 1, n) != 1 {
+        if base < n && exponential_fast_mod(base, (n - 1) as u64, n) != 1 {
             return false;
         }
     }
 
     return true;
-}
-
-/// Calcule l'exponentiation rapide de g^x mod n
-/// # Arguments
-/// * `g` - La base
-/// * `x` - L'exposant
-/// * `modu` - Le modulo
-/// # Returns
-/// * Le résultat de l'exponentiation rapide
-pub fn exponential_fast_mod(g: u64, x: u64, modu: u64) -> u64 {
-    let mut aux: u64 = g % modu; // Base initiale mod n
-    let mut output: u64 = 1;
-    let mut x: u64 = x;
-
-    while x != 0 {
-        if x & 1 == 1 {
-            output = (output * aux) % modu;
-        }
-        x >>= 1; // Opération de division par 2
-        aux = (aux * aux) % modu; // Mise à jour de la base
-    }
-    return output;
 }
 
 /// Calcule si e premier avec (p − 1)(q − 1)
@@ -83,19 +65,4 @@ pub fn exponential_fast_mod(g: u64, x: u64, modu: u64) -> u64 {
 /// * `true` si `e` est premier avec (p − 1)(q − 1), `false` sinon
 pub fn e_is_prime_with(e: u128, p: u128, q: u128) -> bool {
     return are_coprime(e, (p - 1) * (q - 1));
-}
-
-/// Calcule l'inverse modulaire de e modulo phi
-/// # Arguments
-/// * `e` - Le nombre à inverser
-/// * `phi` - Le modulo
-/// # Returns
-/// * L'inverse modulaire de e modulo phi
-pub fn mod_inverse(e: u64, phi: u64) -> u64 {
-    for d in 1..phi {
-        if (e * d) % phi == 1 {
-            return d;
-        }
-    }
-    return 0; // Si l'inverse modulaire n'existe pas
 }

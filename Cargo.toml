@@ -13,9 +13,9 @@ iced = { version = "0.13.1", features = ["tokio"] }
 tokio =  { version = "1", features = ["full"] }
 num-traits = "0"
 num-bigint = "0"
-
-[dev-dependencies]
 num-format = "0"
+
+
 
 [profile.dev]
 incremental = true
