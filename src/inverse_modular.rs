@@ -3,6 +3,8 @@ use std::u128;
 
 
 // algorithme de recherche de l'inverse modulaire par force brute
+#[allow(dead_code)]
+
 pub fn inverse_modular(e: u64, phi_n: u128) -> u128 {
     // Nous allons diviser l'espace de recherche en plusieurs parties
     let num_threads = rayon::current_num_threads() as u128;
@@ -32,6 +34,7 @@ pub fn inverse_modular(e: u64, phi_n: u128) -> u128 {
 }
 
 
+#[allow(dead_code)]
 fn extended_gcd(a: i128, b: i128) -> (i128, i128, i128) {
 
     if a == 0 {

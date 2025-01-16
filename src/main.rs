@@ -16,8 +16,7 @@ use iced::widget::{
 };
 use iced::{Border, Center, Color, Fill, Pixels, Shadow, Size, Task, Theme};
 use num_traits::ToPrimitive;
-use std::ops::RemAssign;
-use num_format::{Buffer, CustomFormat, Grouping, ToFormattedStr, ToFormattedString};
+use num_format::{Buffer, CustomFormat, Grouping, ToFormattedStr};
 use rand::{thread_rng, Rng};
 
 struct App {

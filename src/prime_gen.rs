@@ -34,7 +34,9 @@ pub fn prime_gen(min: u64, max: u64) -> u64 {
 }
 
 pub trait PrimeGen {
+    #[allow(dead_code)]
     fn prime_gen(min: Self, max: Self) -> Self;
+    #[allow(dead_code)]
     fn is_prime(n: u128) -> bool;
 }
 impl PrimeGen for u128 {

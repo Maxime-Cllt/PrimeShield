@@ -4,6 +4,7 @@ use crate::fast_exponentiation::exponential_fast_mod;
 /// # Arguments
 /// * `a` - Le premier nombre
 /// * `b` - Le deuxième nombre
+#[allow(dead_code)]
 pub fn pgcd(a: u128, b: u128) -> u128 {
     let mut a: u128 = a;
     let mut b: u128 = b;
@@ -21,6 +22,7 @@ pub fn pgcd(a: u128, b: u128) -> u128 {
 /// * `b` - Le deuxième nombre
 /// # Returns
 /// * `true` si les deux nombres sont premiers entre eux, `false` sinon
+#[allow(dead_code)]
 pub fn are_coprime(a: u128, b: u128) -> bool {
     return pgcd(a, b) == 1;
 }
@@ -30,6 +32,7 @@ pub fn are_coprime(a: u128, b: u128) -> bool {
 /// * `n` - Le nombre à tester
 /// # Returns
 /// * `true` si `n` est probablement premier, `false` sinon
+#[allow(dead_code)]
 pub fn is_probably_prime(n: u64) -> bool {
 
     let n = n as u128;
@@ -63,6 +66,7 @@ pub fn is_probably_prime(n: u64) -> bool {
 /// * `q` - Le deuxième nombre
 /// # Returns
 /// * `true` si `e` est premier avec (p − 1)(q − 1), `false` sinon
+#[allow(dead_code)]
 pub fn e_is_prime_with(e: u128, p: u128, q: u128) -> bool {
     return are_coprime(e, (p - 1) * (q - 1));
 }
