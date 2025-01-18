@@ -17,6 +17,12 @@ signature RSA.
 👉 Retrouvez l'exécutable pour votre système d'exploitation dans la
 section [Releases](https://github.com/Maxime-Cllt/PrimeShield/releases).
 
+
+<div align="center" style="display: flex; justify-content: space-around;">
+    <img src="/assets/app1.png" alt="PrimeShield" width="400px" height="300px" />
+    <img src="/assets/app2.png" alt="PrimeShield" width="400px" height="300px" />
+</div>
+
 ---
 
 ## 📝 Description

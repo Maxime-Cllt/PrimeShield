@@ -1,5 +1,4 @@
 mod utils;
-
 mod fast_exponentiation;
 mod inverse_modular;
 mod prime_gen;
@@ -93,7 +92,7 @@ impl App {
             .build()
             .expect("Invalid format");
 
-        let mut buf = Buffer::new();
+        let mut buf: Buffer = Buffer::new();
         buf.write_formatted(number, &format);
         buf.as_str().to_string()
     }
@@ -336,7 +335,7 @@ impl App {
                 self.calculate_n();
             }
             Message::GenE => {
-                let mut e = 2u128;
+                let mut e: u128 = 2u128;
                 loop {
                     if are_coprime(e, self.phi_n) {
                         self.e = e;
@@ -349,13 +348,13 @@ impl App {
                 if self.e == 0 || self.phi_n == 0 {
                     return Task::none();
                 }
-                let e = self.e;
-                let phi_n = self.phi_n;
+                let e: u128 = self.e;
+                let phi_n: u128 = self.phi_n;
                 self.progress_d = true;
                 return Task::future(async move {
-                    let d = tokio::task::spawn_blocking(move || {
+                    let d: u128 = tokio::task::spawn_blocking(move || {
                         println!("Calculating d...");
-                        let res = inverse_modular_fast(e, phi_n);
+                        let res: Option<u128> = inverse_modular_fast(e, phi_n);
                         match res {
                             Some(d) => d,
                             None => panic!("No modular inverse found"),
@@ -369,24 +368,24 @@ impl App {
                 });
             }
             Message::RangeMin(range) => {
-                let range = range.replace(Self::SEPARATOR, "");
-                let nb = range.parse().unwrap_or(2);
+                let range: String = range.replace(Self::SEPARATOR, "");
+                let nb: u32 = range.parse().unwrap_or(2);
                 if nb < 2 || nb >= self.range_max {
                     return Task::none();
                 }
                 self.range_min = nb;
             }
             Message::RangeMax(range) => {
-                let range = range.replace(Self::SEPARATOR, "");
-                let nb = range.parse().unwrap_or(u32::MAX);
+                let range: String = range.replace(Self::SEPARATOR, "");
+                let nb: u32 = range.parse().unwrap_or(u32::MAX);
                 if nb < 2 || nb <= self.range_min {
                     return Task::none();
                 }
                 self.range_max = nb;
             }
             Message::Message(msg) => {
-                let msg = msg.replace(Self::SEPARATOR, "");
-                let nb = msg.parse().unwrap_or(0);
+                let msg: String = msg.replace(Self::SEPARATOR, "");
+                let nb: u128 = msg.parse().unwrap_or(0);
                 if nb >= self.n {
                     return Task::none();
                 }
@@ -398,13 +397,13 @@ impl App {
                 return Task::none();
             }
             Message::Decrypt => {
-                let encrypted_message = self.encrypted_message.clone();
-                let d = self.d;
-                let n = self.n.clone();
+                let encrypted_message:u128 = self.encrypted_message.clone();
+                let d: u128 = self.d;
+                let n: u128 = self.n.clone();
                 self.progress_decrypt = true;
 
                 return Task::future(async move {
-                    let information = tokio::task::spawn_blocking(move || {
+                    let information: u128 = tokio::task::spawn_blocking(move || {
                         println!("Decrypting message...");
                         exponential_fast_mod(encrypted_message, u64::try_from(d).unwrap(), n)
                     })
