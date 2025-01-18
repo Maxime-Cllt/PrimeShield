@@ -34,9 +34,9 @@ pub fn are_coprime(a: u128, b: u128) -> bool {
 /// * `true` si `n` est probablement premier, `false` sinon
 #[allow(dead_code)]
 pub fn is_probably_prime(n: u64) -> bool {
-
-    let n = n as u128;
     const BASES: [u128; 4] = [2, 3, 5, 7]; // Bases utilisées pour le test de primalité
+
+    let n: u128 = u128::from(n);
 
     if n < 2 {
         return false;
@@ -51,7 +51,7 @@ pub fn is_probably_prime(n: u64) -> bool {
 
     // Vérifie la condition (base^(n-1) % n == 1) pour chaque base
     for &base in &BASES {
-        if base < n && exponential_fast_mod(base, (n - 1) as u64, n) != 1 {
+        if base < n && exponential_fast_mod(base, u64::try_from(n - 1).unwrap(), n) != 1 {
             return false;
         }
     }

@@ -1,22 +1,25 @@
 use rayon::prelude::*;
 use std::u128;
 
-
-// algorithme de recherche de l'inverse modulaire par force brute
 #[allow(dead_code)]
-
+/// Calcule l'inverse modulaire de `e` modulo `phi_n`.
+/// # Arguments
+/// * `e` - La clé publique `e`.
+/// * `phi_n` - La valeur de la fonction d'Euler de `n`.
+/// # Returns
+/// L'inverse modulaire de `e` modulo `phi_n`.
 pub fn inverse_modular(e: u64, phi_n: u128) -> u128 {
     // Nous allons diviser l'espace de recherche en plusieurs parties
-    let num_threads = rayon::current_num_threads() as u128;
-    let chunk_size = u128::from(u64::MAX) / num_threads;
-    let e = e as u128;
+    let num_threads: u128 = rayon::current_num_threads() as u128;
+    let chunk_size: u128 = u128::from(u64::MAX) / num_threads;
+    let e: u128 = u128::from(e);
 
     // Utilisation de `par_iter` pour parcourir les chunks en parallèle
     (0..num_threads)
         .into_par_iter()
         .find_map_any(|i| {
-            let start = i * chunk_size + 2; // Commencer à partir de 2
-            let end = if i == num_threads - 1 {
+            let start: u128 = i * chunk_size + 2; // Commencer à partir de 2
+            let end: u128 = if i == num_threads - 1 {
                 phi_n // Le dernier chunk peut être plus grand
             } else {
                 (i + 1) * chunk_size
@@ -33,25 +36,22 @@ pub fn inverse_modular(e: u64, phi_n: u128) -> u128 {
         .unwrap_or_else(|| panic!("No modular inverse found"))
 }
 
-
 #[allow(dead_code)]
 fn extended_gcd(a: i128, b: i128) -> (i128, i128, i128) {
-
     if a == 0 {
         (b, 0, 1)
     } else {
         let (gcd, x1, y1) = extended_gcd(b % a, a);
-        let x = y1 - (b / a) * x1;
-        let y = x1;
+        let x: i128 = y1 - (b / a) * x1;
+        let y: i128 = x1;
         (gcd, x, y)
     }
 }
 
 // algorithme de recherche de l'inverse modulaire par l'algorithme d'Euclide étendu
 pub fn inverse_modular_fast(a: u128, m: u128) -> Option<u128> {
-
-    let a = a as i128;
-    let m = m as i128;
+    let a: i128 = i128::try_from(a).unwrap();
+    let m: i128 = i128::try_from(m).unwrap();
 
     let (gcd, x, _) = extended_gcd(a, m);
     if gcd == 1 {

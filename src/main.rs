@@ -6,31 +6,31 @@ mod prime_gen;
 #[cfg(test)]
 mod tests;
 
-use crate::utils::{are_coprime};
-use crate::fast_exponentiation::*;
-use crate::inverse_modular::*;
+use crate::fast_exponentiation::exponential_fast_mod;
+use crate::inverse_modular::inverse_modular_fast;
+use crate::utils::are_coprime;
 use iced::widget::container::Style;
 use iced::widget::{
     button, column, container, horizontal_space, row, text, text_input, vertical_space as spacer,
     Column,
 };
 use iced::{Border, Center, Color, Fill, Pixels, Shadow, Size, Task, Theme};
-use num_traits::ToPrimitive;
 use num_format::{Buffer, CustomFormat, Grouping, ToFormattedStr};
+use num_traits::ToPrimitive;
 use rand::{thread_rng, Rng};
 
 struct App {
-    p: u64,                 // bob prime number
-    q: u64,                 // bob prime number
-    phi_n: u128,            // bob modulo
-    e: u128,                // alice public key
-    d: u128,                // bob private key
-    n: u128,                // bob public key
+    p: u64,                  // bob prime number
+    q: u64,                  // bob prime number
+    phi_n: u128,             // bob modulo
+    e: u128,                 // alice public key
+    d: u128,                 // bob private key
+    n: u128,                 // bob public key
     message: u128,           // alice message
     encrypted_message: u128, // alice encrypted message
     decrypted_message: u128, // bob decrypted message
-    range_min: u32,         // range prime gen
-    range_max: u32,         // range prime gen,
+    range_min: u32,          // range prime gen
+    range_max: u32,          // range prime gen,
     progress_d: bool,
     progress_decrypt: bool,
 }
@@ -80,7 +80,6 @@ fn main() -> iced::Result {
 }
 
 impl App {
-
     const SEPARATOR: &'static str = "  ";
 
     // format a number type T
@@ -88,9 +87,11 @@ impl App {
     where
         T: ToPrimitive + ToFormattedStr,
     {
-        let format = CustomFormat::builder().grouping(Grouping::Standard)
-        .separator(Self::SEPARATOR)
-        .build().expect("Invalid format");
+        let format = CustomFormat::builder()
+            .grouping(Grouping::Standard)
+            .separator(Self::SEPARATOR)
+            .build()
+            .expect("Invalid format");
 
         let mut buf = Buffer::new();
         buf.write_formatted(number, &format);
@@ -109,7 +110,7 @@ impl App {
                             row![
                                 container(text("message : ").size(20)).align_y(Center),
                                 container(
-                                    text_input("message", &*self.message.to_string())
+                                    text_input("message", &self.message.to_string())
                                         .on_input(Message::Message)
                                         .size(20)
                                 )
@@ -139,7 +140,7 @@ impl App {
                 .height(Fill)
                 .padding(10)
                 .style(|_theme| Style {
-                    background: Default::default(),
+                    background: Option::default(),
                     text_color: Option::from(Color::WHITE),
                     border: Border::default()
                         .rounded(10)
@@ -160,14 +161,14 @@ impl App {
                             row![
                                 container(text("range prime gen : ").size(20)).align_y(Center),
                                 container(
-                                    text_input("start", &*self.range_min.to_string())
+                                    text_input("start", &self.range_min.to_string())
                                         .on_input(Message::RangeMin)
                                         .size(20)
                                 )
                                 .width(Fill)
                                 .align_y(Center),
                                 container(
-                                    text_input("end", &*self.range_max.to_string())
+                                    text_input("end", &self.range_max.to_string())
                                         .on_input(Message::RangeMax)
                                         .size(20)
                                 )
@@ -243,24 +244,24 @@ impl App {
                     .center_y(Fill)
                     .width(Fill)
                     .padding(10),
-                    container(
-                        if self.decrypted_message != 0{
-                            if self.decrypted_message != self.message {
-                                text("Decryption failed".to_string()).color(Color::new(1.0, 0.0, 0.0, 1.0))
-                            } else {
-                                text("Decryption success".to_string()).color(Color::new(0.0, 1.0, 0.0, 1.0))
-                            }
+                    container(if self.decrypted_message != 0 {
+                        if self.decrypted_message != self.message {
+                            text("Decryption failed".to_string())
+                                .color(Color::new(1.0, 0.0, 0.0, 1.0))
                         } else {
-                            text("".to_string())
+                            text("Decryption success".to_string())
+                                .color(Color::new(0.0, 1.0, 0.0, 1.0))
                         }
-                    )
+                    } else {
+                        text(String::new())
+                    })
                 ],)
                 .center_x(Fill)
                 .width(Fill)
                 .height(Fill)
                 .padding(10)
                 .style(|_theme| Style {
-                    background: Default::default(),
+                    background: Option::default(),
                     text_color: Option::from(Color::WHITE),
                     border: Border::default()
                         .rounded(10)
@@ -307,7 +308,7 @@ impl App {
             .width(Fill)
             .padding(10)
             .style(|_theme| Style {
-                background: Default::default(),
+                background: Option::default(),
                 text_color: Option::from(Color::WHITE),
                 border: Border::default()
                     .rounded(10)
@@ -327,11 +328,11 @@ impl App {
     pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
             Message::GenP => {
-                self.p = prime_gen::prime_gen(self.range_min as u64, self.range_max as u64);
+                self.p = prime_gen::prime_gen(u64::from(self.range_min), u64::from(self.range_max));
                 self.calculate_n();
             }
             Message::GenQ => {
-                self.q = prime_gen::prime_gen(self.range_min as u64, self.range_max as u64);
+                self.q = prime_gen::prime_gen(u64::from(self.range_min), u64::from(self.range_max));
                 self.calculate_n();
             }
             Message::GenE => {
@@ -345,7 +346,7 @@ impl App {
                 }
             }
             Message::CalculateD => {
-                if self.e==0 || self.phi_n==0 {
+                if self.e == 0 || self.phi_n == 0 {
                     return Task::none();
                 }
                 let e = self.e;
@@ -354,10 +355,10 @@ impl App {
                 return Task::future(async move {
                     let d = tokio::task::spawn_blocking(move || {
                         println!("Calculating d...");
-                        let res = inverse_modular_fast(e,phi_n);
+                        let res = inverse_modular_fast(e, phi_n);
                         match res {
                             Some(d) => d,
-                            None => panic!("No modular inverse found")
+                            None => panic!("No modular inverse found"),
                         }
                     })
                     .await
@@ -378,7 +379,7 @@ impl App {
             Message::RangeMax(range) => {
                 let range = range.replace(Self::SEPARATOR, "");
                 let nb = range.parse().unwrap_or(u32::MAX);
-                if nb < 2 || nb <= self.range_min{
+                if nb < 2 || nb <= self.range_min {
                     return Task::none();
                 }
                 self.range_max = nb;
@@ -392,7 +393,8 @@ impl App {
                 self.message = nb;
             }
             Message::Encrypt => {
-                self.encrypted_message = exponential_fast_mod(self.message, self.e as u64, self.n);
+                self.encrypted_message =
+                    exponential_fast_mod(self.message, u64::try_from(self.e).unwrap(), self.n);
                 return Task::none();
             }
             Message::Decrypt => {
@@ -404,7 +406,7 @@ impl App {
                 return Task::future(async move {
                     let information = tokio::task::spawn_blocking(move || {
                         println!("Decrypting message...");
-                        exponential_fast_mod(encrypted_message, d as u64, n)
+                        exponential_fast_mod(encrypted_message, u64::try_from(d).unwrap(), n)
                     })
                     .await
                     .unwrap();
@@ -424,7 +426,7 @@ impl App {
                 return Task::none();
             }
             Message::FakeIt => {
-                self.encrypted_message+= thread_rng().gen_range(1..u32::MAX) as u128;
+                self.encrypted_message += u128::from(thread_rng().gen_range(1..u32::MAX));
             }
         }
         Task::none()

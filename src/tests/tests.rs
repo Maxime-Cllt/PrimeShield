@@ -49,13 +49,24 @@ async fn test_prime_gen() {
     const MIN: u64 = 1000;
     const MAX: u64 = 10000;
 
+    let prime_u128: u128 =
+        u128::prime_gen(u128::from(MIN), u128::from(MAX));
+    let prime_u64: u64 = prime_gen(MIN, MAX);
+
+    // test de sûreté
     assert!(is_prime(3));
     assert!(is_prime(5));
-    assert!(is_prime(1_243_093)); //1243093 est un nombre premier
+    assert!(is_prime(1_243_093));
+    assert!(!is_prime(10));
+    assert!(!is_prime(20));
 
-    let prime: u128 = u128::from(prime_gen(MIN, MAX));
-    assert!(prime >= u128::from(MIN) && prime <= u128::from(MAX));
-    assert!(is_prime(u64::try_from(prime).unwrap()));
+    // test pour u64
+    assert!((MIN..=MAX).contains(&prime_u64));
+    assert!(is_prime(prime_u64));
+
+    // test pour u128
+    assert!(prime_u128 >= u128::from(MIN) && prime_u128 <= u128::from(MAX));
+    assert!(u128::is_prime(prime_u128));
 }
 
 #[tokio::test]
@@ -83,7 +94,7 @@ async fn test_inverse_modular() {
 
     println!("d: {}", d.to_formatted_string(&Locale::fr));
 
-    let ed: u128 = E * u128::from(d);
+    let ed: u128 = E * d;
     let res: u128 = ed % phi_n;
     assert_eq!(res, 1);
 }
@@ -95,15 +106,13 @@ async fn test_mod_inverse() {
     const Q: u128 = 11u128;
 
     let start: Instant = Instant::now();
-    let d: Option<u128> = inverse_modular_fast(
-        E, (P - 1) * (Q - 1),
-    );
+    let d: Option<u128> = inverse_modular_fast(E, (P - 1) * (Q - 1));
     println!(
         "Temps écoulé en test_mod_inverse() est: {:?}",
         start.elapsed()
     );
 
-    let d: u128 = u128::try_from(d.unwrap()).unwrap();
+    let d: u128 = d.unwrap();
     println!("d: {}", d.to_formatted_string(&Locale::fr));
 
     let ed: u128 = E * d;
@@ -112,19 +121,19 @@ async fn test_mod_inverse() {
     assert_eq!(res, 1);
 }
 
-
 #[tokio::test]
 async fn fast_exponentiation_fn_test() {
-    let base: u128 = 106_190;
-    let exponent: u32 = 119_863;
-    let modulo = 839_040;
+    const BASE: u128 = 106_190;
+    const EXPONENT: u32 = 119_863;
+    const MODULO: u128 = 839_040;
 
-    let mut  start: Instant = Instant::now();
+    let start: Instant = Instant::now();
 
-    let res = exponential_fast_mod(base, exponent as u64, modulo);
+    let res: u128 = exponential_fast_mod(BASE, u64::from(EXPONENT), MODULO);
 
     println!(
         "Temps écoulé en fast_exponentiation_fn_test() est: {:?} {:?}",
-        start.elapsed(), res
+        start.elapsed(),
+        res
     );
 }

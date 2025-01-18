@@ -1,25 +1,31 @@
 use rand::Rng;
 use rayon::iter::ParallelIterator;
+use std::collections::HashMap;
 use std::sync::{Arc, Mutex, MutexGuard};
 
-// on génère un nombre aléatoire entre min et max
+/// Génère un nombre premier aléatoire entre min et max
+/// # Arguments
+/// * `min` - Le minimum de la plage de recherche
+/// * `max` - Le maximum de la plage de recherche
+/// # Returns
+/// * `u64` - Un nombre premier aléatoire entre min et max
 pub fn prime_gen(min: u64, max: u64) -> u64 {
     assert!(
         min <= max,
         "Le minimum doit être inférieur ou égal au maximum"
     );
 
-    let tested_numbers: Arc<Mutex<Vec<u64>>> = Arc::new(Mutex::new(Vec::new()));
+    let tested_numbers: Arc<Mutex<HashMap<u64, bool>>> = Arc::new(Mutex::new(HashMap::new()));
 
     rayon::iter::repeat(())
         .find_map_any(|()| {
             // on génère un nombre aléatoire entre min et max
             let num: u64 = rand::thread_rng().gen_range(min..max);
 
-            let mut tested: MutexGuard<Vec<u64>> = tested_numbers.lock().unwrap();
+            let mut tested: MutexGuard<HashMap<u64, bool>> = tested_numbers.lock().unwrap();
 
             // on vérifie si le nombre generé a déjà été testé ou si on a testé tous les nombres entre min et max
-            if tested.contains(&num) || tested.len() >= usize::try_from(max - min).unwrap() {
+            if tested.contains_key(&num) || tested.len() >= usize::try_from(max - min).unwrap() {
                 return None;
             }
 
@@ -27,10 +33,35 @@ pub fn prime_gen(min: u64, max: u64) -> u64 {
                 return Some(num);
             }
 
-            tested.push(num);
+            tested.insert(num, false);
             None
         })
         .unwrap_or_else(|| panic!("No prime number found in range"))
+}
+
+/// Vérifie si un nombre u64 est premier
+/// # Arguments
+/// * `n` - Le nombre à vérifier
+/// # Returns
+/// * `bool` - true si le nombre est premier, sinon false
+pub fn is_prime(n: u64) -> bool {
+    if n < 2 {
+        return false;
+    }
+    if n == 2 {
+        return true;
+    }
+    if n % 2 == 0 {
+        return false;
+    }
+    let mut i: u64 = 3;
+    while i * i <= n {
+        if n % i == 0 {
+            return false;
+        }
+        i += 2;
+    }
+    return true;
 }
 
 pub trait PrimeGen {
@@ -43,19 +74,20 @@ impl PrimeGen for u128 {
     fn prime_gen(min: u128, max: u128) -> u128 {
         assert!(min <= max, "min should be less than max");
 
-        let tested_numbers: Arc<Mutex<Vec<u128>>> = Arc::new(Mutex::new(Vec::new()));
+        let tested_numbers: Arc<Mutex<HashMap<u128, bool>>> = Arc::new(Mutex::new(HashMap::new()));
 
         rayon::iter::repeat(())
             .find_map_any(|()| {
                 // on génère un nombre aléatoire entre min et max
                 let num: u128 = rand::thread_rng().gen_range(min..max);
 
-                let mut tested: MutexGuard<Vec<u128>> = tested_numbers
+                let mut tested: MutexGuard<HashMap<u128, bool>> = tested_numbers
                     .lock()
                     .unwrap_or_else(|_| panic!("MutexGuard error"));
 
                 // on vérifie si le nombre generé a déjà été testé ou si on a testé tous les nombres entre min et max
-                if tested.contains(&num) || tested.len() >= usize::try_from(max - min).unwrap() {
+                if tested.contains_key(&num) || tested.len() >= usize::try_from(max - min).unwrap()
+                {
                     return None;
                 }
 
@@ -63,7 +95,7 @@ impl PrimeGen for u128 {
                     return Some(num);
                 }
 
-                tested.push(num);
+                tested.insert(num, false);
                 None
             })
             .unwrap_or_else(|| panic!("No prime number found in range"))
@@ -79,7 +111,7 @@ impl PrimeGen for u128 {
         if n % 2 == 0 {
             return false;
         }
-        let mut i = 3;
+        let mut i: u128 = 3;
         while i * i <= n {
             if n % i == 0 {
                 return false;
@@ -88,25 +120,4 @@ impl PrimeGen for u128 {
         }
         true
     }
-}
-
-// on vérifie si un nombre est premier
-pub fn is_prime(n: u64) -> bool {
-    if n < 2 {
-        return false;
-    }
-    if n == 2 {
-        return true;
-    }
-    if n % 2 == 0 {
-        return false;
-    }
-    let mut i = 3;
-    while i * i <= n {
-        if n % i == 0 {
-            return false;
-        }
-        i += 2;
-    }
-    true
 }

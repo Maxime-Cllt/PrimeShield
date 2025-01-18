@@ -202,14 +202,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.repository.name }}-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/SqliteCleaner
+          path: target/${{ matrix.target }}/release/PrimeShield
 
       - name: Upload release binary (Linux & macOS)
         if: ${{ matrix.os == 'windows-latest' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ github.event.repository.name }}-${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/SqliteCleaner.exe
+          path: target/${{ matrix.target }}/release/PrimeShield.exe
 
 #
 #    upload-artifacts:
@@ -237,12 +237,12 @@ jobs:
 #        - name: Download release binary
 #          uses: actions/download-artifact@v3
 #          with:
-#            name: SqliteCleaner-${{ matrix.target }}
+#            name: PrimeShield-${{ matrix.target }}
 #
 #        - name: Upload release binary to GitHub Release
 #          uses: actions/upload-release-asset@v1
 #          with:
 #            upload_url: ${{ needs.create-release.outputs.upload_url }}
-#            asset_path: target/${{ matrix.target }}/release/SqliteCleaner
-#            asset_name: SqliteCleaner-${{ matrix.target }}
+#            asset_path: target/${{ matrix.target }}/release/PrimeShield
+#            asset_name: PrimeShield-${{ matrix.target }}
 #            asset_content_type: application/octet-stream
