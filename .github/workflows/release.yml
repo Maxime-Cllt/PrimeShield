@@ -3,8 +3,7 @@ name: "Build & Release Workflow"
 on:
   push:
     tags:
-      - "v*.*.*"
-  workflow_dispatch:  # Allows manually triggering the workflow
+      - 'v*'
 
 
 jobs:
@@ -25,7 +24,7 @@ jobs:
           path: |
             ~/.cargo
             target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ matrix.arch }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
 
@@ -61,7 +60,7 @@ jobs:
           path: |
             ~/.cargo
             target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ matrix.arch }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
 
@@ -97,7 +96,7 @@ jobs:
           path: |
             ~/.cargo
             target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ matrix.arch }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
 
@@ -123,7 +122,7 @@ jobs:
     needs: [ build-darwin, build-windows, build-linux ]
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: ./artifacts
 
