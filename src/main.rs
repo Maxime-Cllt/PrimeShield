@@ -7,7 +7,7 @@ mod tests;
 
 use crate::fast_exponentiation::exponential_fast_mod;
 use crate::inverse_modular::inverse_modular_fast;
-use crate::utils::are_coprime;
+use crate::prime_gen::prime_gen_probably_and_coprime;
 use iced::widget::container::Style;
 use iced::widget::{
     button, column, container, horizontal_space, row, text, text_input, vertical_space as spacer,
@@ -17,6 +17,7 @@ use iced::{Border, Center, Color, Fill, Pixels, Shadow, Size, Task, Theme};
 use num_format::{Buffer, CustomFormat, Grouping, ToFormattedStr};
 use num_traits::ToPrimitive;
 use rand::{thread_rng, Rng};
+use std::u128;
 
 struct App {
     p: u64,                  // bob prime number
@@ -321,7 +322,7 @@ impl App {
                 shadow: Shadow::default(),
             }), // Pass a closure here
         ]
-        .padding(20)
+            .padding(20)
     }
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
@@ -335,14 +336,10 @@ impl App {
                 self.calculate_n();
             }
             Message::GenE => {
-                let mut e: u128 = 2u128;
-                loop {
-                    if are_coprime(e, self.phi_n) {
-                        self.e = e;
-                        break;
-                    }
-                    e += 1;
+                if self.q == self.p && self.q == 0 {
+                    return Task::none();
                 }
+                self.e = prime_gen_probably_and_coprime(2, u64::MAX, self.phi_n)
             }
             Message::CalculateD => {
                 if self.e == 0 || self.phi_n == 0 {
@@ -360,8 +357,8 @@ impl App {
                             None => panic!("No modular inverse found"),
                         }
                     })
-                    .await
-                    .unwrap();
+                        .await
+                        .unwrap();
 
                     // Send the information back to the update function
                     Message::CalculateDFinished(d)
@@ -393,11 +390,11 @@ impl App {
             }
             Message::Encrypt => {
                 self.encrypted_message =
-                    exponential_fast_mod(self.message, u64::try_from(self.e).unwrap(), self.n);
+                    exponential_fast_mod(self.message, self.e, self.n);
                 return Task::none();
             }
             Message::Decrypt => {
-                let encrypted_message:u128 = self.encrypted_message.clone();
+                let encrypted_message: u128 = self.encrypted_message.clone();
                 let d: u128 = self.d;
                 let n: u128 = self.n.clone();
                 self.progress_decrypt = true;
@@ -405,10 +402,10 @@ impl App {
                 return Task::future(async move {
                     let information: u128 = tokio::task::spawn_blocking(move || {
                         println!("Decrypting message...");
-                        exponential_fast_mod(encrypted_message, u64::try_from(d).unwrap(), n)
+                        exponential_fast_mod(encrypted_message, d, n)
                     })
-                    .await
-                    .unwrap();
+                        .await
+                        .unwrap();
 
                     // Send the information back to the update function
                     Message::DecryptedMessage(information)

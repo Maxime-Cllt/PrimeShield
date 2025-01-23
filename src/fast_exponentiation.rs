@@ -6,7 +6,7 @@
 /// * `modu` - Le modulo
 /// # Returns
 /// * Le résultat de l'exponentiation rapide
-pub fn exponential_fast_mod(g: u128, x: u64, modu: u128) -> u128 {
+pub fn exponential_fast_mod(g: u128, x: u128, modu: u128) -> u128 {
     let mut aux: u128 = g % modu; // Base initiale mod n
     let mut output: u128 = 1u128;
     let mut x: u128 =  u128::from(x);

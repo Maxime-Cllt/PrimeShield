@@ -32,8 +32,8 @@ async fn test_exponential_fast_mod() {
 
 #[tokio::test]
 async fn test_is_probably_prime() {
-    const PRIME_TO_TEST: [u64; 11] = [3, 5, 7, 11, 13, 19, 241, 599, 1319, 3671, 7879];
-    const NORMAL_TO_TEST: [u64; 7] = [10, 20, 30, 50, 1000, 55555, 45678];
+    const PRIME_TO_TEST: [u128; 12] = [3, 5, 7, 11, 13, 19, 241, 599, 1319, 3671, 7879, 12_144_614_961_440_690_947];
+    const NORMAL_TO_TEST: [u128; 7] = [10, 20, 30, 50, 1000, 55555, 45678];
 
     for &n in &PRIME_TO_TEST {
         assert!(is_probably_prime(n));
@@ -124,12 +124,12 @@ async fn test_mod_inverse() {
 #[tokio::test]
 async fn fast_exponentiation_fn_test() {
     const BASE: u128 = 106_190;
-    const EXPONENT: u32 = 119_863;
+    const EXPONENT: u128 = 119_863;
     const MODULO: u128 = 839_040;
 
     let start: Instant = Instant::now();
 
-    let res: u128 = exponential_fast_mod(BASE, u64::from(EXPONENT), MODULO);
+    let res: u128 = exponential_fast_mod(BASE, EXPONENT, MODULO);
 
     println!(
         "Temps écoulé en fast_exponentiation_fn_test() est: {:?} {:?}",

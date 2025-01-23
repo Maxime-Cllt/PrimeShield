@@ -2,6 +2,7 @@ use rand::Rng;
 use rayon::iter::ParallelIterator;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex, MutexGuard};
+use crate::utils::{are_coprime, is_probably_prime};
 
 /// Génère un nombre premier aléatoire entre min et max
 /// # Arguments
@@ -37,6 +38,36 @@ pub fn prime_gen(min: u64, max: u64) -> u64 {
             None
         })
         .unwrap_or_else(|| panic!("No prime number found in range"))
+}
+
+pub fn prime_gen_probably_and_coprime(min : u64, max : u64, nb : u128) -> u128{
+    assert!(
+        min <= max,
+        "Le minimum doit être inférieur ou égal au maximum"
+    );
+
+    let tested_numbers: Arc<Mutex<HashMap<u64, bool>>> = Arc::new(Mutex::new(HashMap::new()));
+
+    rayon::iter::repeat(())
+        .find_map_any(|()| {
+            // on génère un nombre aléatoire entre min et max
+            let num: u64 = rand::thread_rng().gen_range(min..max);
+
+            let mut tested: MutexGuard<HashMap<u64, bool>> = tested_numbers.lock().unwrap();
+
+            // on vérifie si le nombre generé a déjà été testé ou si on a testé tous les nombres entre min et max
+            if tested.contains_key(&num) || tested.len() >= usize::try_from(max - min).unwrap() {
+                return None;
+            }
+
+            if is_probably_prime(u128::from(num)) && are_coprime(u128::from(num), nb) {
+                return Some(num);
+            }
+
+            tested.insert(num, false);
+            None
+        })
+        .unwrap_or_else(|| panic!("No prime number found in range")) as u128
 }
 
 /// Vérifie si un nombre u64 est premier
