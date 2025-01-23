@@ -40,7 +40,7 @@ jobs:
         run: cargo build --release --target ${{matrix.arch}}
 
       - name: Upload macOS artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: macOS-app-${{ matrix.arch }}
           path: target/${{matrix.arch}}/release/PrimeShield
@@ -75,7 +75,7 @@ jobs:
         run: cargo build --release --target ${{matrix.arch}}
 
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-app-${{ matrix.arch }}
           path: target/${{ matrix.arch }}/release/PrimeShield.exe
@@ -111,7 +111,7 @@ jobs:
         run: cargo build --release --target ${{ matrix.arch }}
 
       - name: Upload Linux artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-app-${{ matrix.arch }}
           path: target/${{ matrix.arch }}/release/PrimeShield
