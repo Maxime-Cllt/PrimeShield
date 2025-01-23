@@ -1,12 +1,11 @@
 name: "Build & Release Workflow"
 
-permissions:
-  contents: write
-
 on:
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:  # Allows manually triggering the workflow
+
 
 jobs:
 
