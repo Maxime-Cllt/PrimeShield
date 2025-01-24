@@ -34,15 +34,17 @@ jobs:
       - name: Install dependencies
         run: rustup target add ${{ matrix.arch }}
 
-
       - name: Build for macOS ${{ matrix.arch }}
         run: cargo build --release --target ${{matrix.arch}}
+
+      - name: Rename binary
+        run: mv target/${{ matrix.arch }}/release/PrimeShield target/${{ matrix.arch }}/release/PrimeShield-${{ matrix.arch }}
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
         with:
           name: macOS-app-${{ matrix.arch }}
-          path: target/${{matrix.arch}}/release/PrimeShield
+          path: target/${{ matrix.arch }}/release/PrimeShield-${{ matrix.arch }}
 
   build-windows:
     name: Build for Windows (x86 and ARM)
@@ -73,11 +75,14 @@ jobs:
       - name: Build for Windows ${{ matrix.arch }}
         run: cargo build --release --target ${{matrix.arch}}
 
+      - name: Rename binary
+        run: mv target/${{ matrix.arch }}/release/PrimeShield.exe target/${{ matrix.arch }}/release/PrimeShield-${{ matrix.arch }}.exe
+
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-app-${{ matrix.arch }}
-          path: target/${{ matrix.arch }}/release/PrimeShield.exe
+          path: target/${{ matrix.arch }}/release/PrimeShield-${{ matrix.arch }}.exe
 
 
   build-linux-x86-64:
@@ -109,11 +114,14 @@ jobs:
       - name: Build for Linux ${{ matrix.arch }}
         run: cargo build --release --target ${{ matrix.arch }}
 
+      - name: Rename binary
+        run: mv target/${{ matrix.arch }}/release/PrimeShield target/${{ matrix.arch }}/release/PrimeShield-${{ matrix.arch }}
+
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux-app-${{ matrix.arch }}
-          path: target/${{ matrix.arch }}/release/PrimeShield
+          path: target/${{ matrix.arch }}/release/PrimeShield-${{ matrix.arch }}
 
 
 #  build-linux-aarch64:
@@ -164,29 +172,9 @@ jobs:
         with:
           path: ./artifacts
 
-      - name: Rename artifacts with OS/Arch
-        shell: bash
-        run: |
-          mkdir -p renamed_artifacts
-          for artifact in artifacts/*; do
-            # Extraire OS et arch du nom de l'artefact
-            filename=$(basename "$artifact")
-            os_arch=$(echo "$filename" | cut -d'-' -f1,2)
-          
-            # Déterminer l'extension
-            if [[ "$os_arch" == windows* ]]; then
-              ext=".exe"
-            else
-              ext=""
-            fi
-          
-            # Renommer et copier
-            cp "$artifact/PrimeShield$ext" "renamed_artifacts/PrimeShield-$os_arch$ext"
-          done
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: renamed_artifacts/*
+          files: ./artifacts/**/*  # Upload all artifacts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
