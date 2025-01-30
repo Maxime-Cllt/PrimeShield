@@ -110,7 +110,7 @@ jobs:
       - name: Install cross-compilation tools
         uses: taiki-e/setup-cross-toolchain-action@v1
         with:
-          target: ${{ matrix.target }}
+          target: ${{ matrix.arch }}
 
       - name: Build for Linux ${{ matrix.arch }}
         run: cargo build --release --target ${{ matrix.arch }}
