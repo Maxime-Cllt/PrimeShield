@@ -17,7 +17,6 @@ use iced::{Border, Center, Color, Fill, Pixels, Shadow, Size, Task, Theme};
 use num_format::{Buffer, CustomFormat, Grouping, ToFormattedStr};
 use num_traits::ToPrimitive;
 use rand::{thread_rng, Rng};
-use std::u128;
 
 struct App {
     p: u64,                  // bob prime number

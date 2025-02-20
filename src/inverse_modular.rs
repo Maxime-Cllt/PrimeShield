@@ -1,5 +1,4 @@
 use rayon::prelude::*;
-use std::u128;
 
 #[allow(dead_code)]
 /// Calcule l'inverse modulaire de `e` modulo `phi_n`.

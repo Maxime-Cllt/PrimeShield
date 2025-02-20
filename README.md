@@ -63,11 +63,11 @@ PrimeShield est compatible avec les systèmes d'exploitation suivants :
 
 Avant de commencer, assurez-vous d’avoir les éléments suivants installés :
 
-- **Rust** : Version 1.83 ou supérieure.
+- **Rust** : Version 1.84 ou supérieure.
 - **Cargo** : Gestionnaire de dépendances et outil de compilation pour Rust.
 
 <div align="center">
-    <img src="https://img.shields.io/badge/Rust-1.83+-informational?style=flat&logo=rust&logoColor=white&color=53a863" alt="Rust" />
+    <img src="https://img.shields.io/badge/Rust-1.84+-informational?style=flat&logo=rust&logoColor=white&color=53a863" alt="Rust" />
     <img src="https://img.shields.io/badge/Cargo-informational?style=flat&logo=rust&logoColor=white&color=53a863" alt="Cargo" />
 </div>
 
