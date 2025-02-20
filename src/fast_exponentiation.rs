@@ -1,4 +1,3 @@
-
 /// Calcule l'exponentiation rapide de g^x mod n
 /// # Arguments
 /// * `g` - La base
@@ -9,7 +8,7 @@
 pub fn exponential_fast_mod(g: u128, x: u128, modu: u128) -> u128 {
     let mut aux: u128 = g % modu; // Base initiale mod n
     let mut output: u128 = 1u128;
-    let mut x: u128 =  u128::from(x);
+    let mut x: u128 = u128::from(x);
 
     while x != 0 {
         if x & 1 == 1 {

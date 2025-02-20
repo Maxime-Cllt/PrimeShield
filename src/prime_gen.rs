@@ -21,7 +21,7 @@ pub fn prime_gen(min: u64, max: u64) -> u64 {
     rayon::iter::repeat(())
         .find_map_any(|()| {
             // on génère un nombre aléatoire entre min et max
-            let num: u64 = rand::thread_rng().gen_range(min..max);
+            let num: u64 = rand::rng().random_range(min..max);
 
             let mut tested: MutexGuard<HashMap<u64, bool>> = tested_numbers.lock().unwrap();
 
@@ -51,7 +51,7 @@ pub fn prime_gen_probably_and_coprime(min : u64, max : u64, nb : u128) -> u128{
     rayon::iter::repeat(())
         .find_map_any(|()| {
             // on génère un nombre aléatoire entre min et max
-            let num: u64 = rand::thread_rng().gen_range(min..max);
+            let num: u64 = rand::rng().random_range(min..max);
 
             let mut tested: MutexGuard<HashMap<u64, bool>> = tested_numbers.lock().unwrap();
 
@@ -110,7 +110,7 @@ impl PrimeGen for u128 {
         rayon::iter::repeat(())
             .find_map_any(|()| {
                 // on génère un nombre aléatoire entre min et max
-                let num: u128 = rand::thread_rng().gen_range(min..max);
+                let num: u128 = rand::rng().random_range(min..max);
 
                 let mut tested: MutexGuard<HashMap<u128, bool>> = tested_numbers
                     .lock()

@@ -1,9 +1,9 @@
-mod utils;
 mod fast_exponentiation;
 mod inverse_modular;
 mod prime_gen;
 #[cfg(test)]
 mod tests;
+mod utils;
 
 use crate::fast_exponentiation::exponential_fast_mod;
 use crate::inverse_modular::inverse_modular_fast;
@@ -16,7 +16,7 @@ use iced::widget::{
 use iced::{Border, Center, Color, Fill, Pixels, Shadow, Size, Task, Theme};
 use num_format::{Buffer, CustomFormat, Grouping, ToFormattedStr};
 use num_traits::ToPrimitive;
-use rand::{thread_rng, Rng};
+use rand::{rng, Rng};
 
 struct App {
     p: u64,                  // bob prime number
@@ -30,8 +30,8 @@ struct App {
     decrypted_message: u128, // bob decrypted message
     range_min: u32,          // range prime gen
     range_max: u32,          // range prime gen,
-    progress_d: bool,
-    progress_decrypt: bool,
+    progress_d: bool,        // bob calculating d
+    progress_decrypt: bool,  // bob decrypting
 }
 
 impl Default for App {
@@ -321,7 +321,7 @@ impl App {
                 shadow: Shadow::default(),
             }), // Pass a closure here
         ]
-            .padding(20)
+        .padding(20)
     }
 
     pub fn update(&mut self, message: Message) -> Task<Message> {
@@ -356,8 +356,8 @@ impl App {
                             None => panic!("No modular inverse found"),
                         }
                     })
-                        .await
-                        .unwrap();
+                    .await
+                    .unwrap();
 
                     // Send the information back to the update function
                     Message::CalculateDFinished(d)
@@ -388,8 +388,7 @@ impl App {
                 self.message = nb;
             }
             Message::Encrypt => {
-                self.encrypted_message =
-                    exponential_fast_mod(self.message, self.e, self.n);
+                self.encrypted_message = exponential_fast_mod(self.message, self.e, self.n);
                 return Task::none();
             }
             Message::Decrypt => {
@@ -403,8 +402,8 @@ impl App {
                         println!("Decrypting message...");
                         exponential_fast_mod(encrypted_message, d, n)
                     })
-                        .await
-                        .unwrap();
+                    .await
+                    .unwrap();
 
                     // Send the information back to the update function
                     Message::DecryptedMessage(information)
@@ -421,7 +420,7 @@ impl App {
                 return Task::none();
             }
             Message::FakeIt => {
-                self.encrypted_message += u128::from(thread_rng().gen_range(1..u32::MAX));
+                self.encrypted_message += u128::from(rng().random_range(1..u32::MAX));
             }
         }
         Task::none()

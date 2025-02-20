@@ -32,7 +32,7 @@ pub fn inverse_modular(e: u64, phi_n: u128) -> u128 {
             }
             None
         })
-        .unwrap_or_else(|| panic!("No modular inverse found"))
+        .unwrap_or_else(|| panic!("Aucun inverse modulaire trouvé pour e = {e}"))
 }
 
 #[allow(dead_code)]
