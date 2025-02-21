@@ -13,7 +13,7 @@ pub fn pgcd(a: u128, b: u128) -> u128 {
         a = b;
         b = r;
     }
-    return a;
+    a
 }
 
 /// Vérifie si deux nombres sont premiers entre eux
@@ -24,7 +24,7 @@ pub fn pgcd(a: u128, b: u128) -> u128 {
 /// * `true` si les deux nombres sont premiers entre eux, `false` sinon
 #[allow(dead_code)]
 pub fn are_coprime(a: u128, b: u128) -> bool {
-    return pgcd(a, b) == 1;
+    pgcd(a, b) == 1
 }
 
 /// Vérifie si un nombre est probablement premier en utilisant les bases 2, 3, 5 et 7
@@ -54,7 +54,7 @@ pub fn is_probably_prime(n: u128) -> bool {
         }
     }
 
-    return true;
+    true
 }
 
 /// Calcule si e premier avec (p − 1)(q − 1)
@@ -66,5 +66,5 @@ pub fn is_probably_prime(n: u128) -> bool {
 /// * `true` si `e` est premier avec (p − 1)(q − 1), `false` sinon
 #[allow(dead_code)]
 pub fn e_is_prime_with(e: u128, p: u128, q: u128) -> bool {
-    return are_coprime(e, (p - 1) * (q - 1));
+    are_coprime(e, (p - 1) * (q - 1))
 }

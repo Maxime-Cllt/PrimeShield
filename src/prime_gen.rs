@@ -1,8 +1,8 @@
+use crate::utils::{are_coprime, is_probably_prime};
 use rand::Rng;
 use rayon::iter::ParallelIterator;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex, MutexGuard};
-use crate::utils::{are_coprime, is_probably_prime};
 
 /// Génère un nombre premier aléatoire entre min et max
 /// # Arguments
@@ -40,7 +40,14 @@ pub fn prime_gen(min: u64, max: u64) -> u64 {
         .unwrap_or_else(|| panic!("No prime number found in range"))
 }
 
-pub fn prime_gen_probably_and_coprime(min : u64, max : u64, nb : u128) -> u128{
+/// Génère un nombre premier aléatoire entre min et max et qui est premier avec nb
+/// # Arguments
+/// * `min` - Le minimum de la plage de recherche
+/// * `max` - Le maximum de la plage de recherche
+/// * `nb` - Le nombre avec lequel le nombre premier doit être premier
+/// # Returns
+/// * `u128` - Un nombre premier aléatoire entre min et max et qui est premier avec nb
+pub fn prime_gen_probably_and_coprime(min: u64, max: u64, nb: u128) -> u128 {
     assert!(
         min <= max,
         "Le minimum doit être inférieur ou égal au maximum"
@@ -92,7 +99,7 @@ pub fn is_prime(n: u64) -> bool {
         }
         i += 2;
     }
-    return true;
+    true
 }
 
 pub trait PrimeGen {

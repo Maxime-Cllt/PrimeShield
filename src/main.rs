@@ -392,9 +392,9 @@ impl App {
                 return Task::none();
             }
             Message::Decrypt => {
-                let encrypted_message: u128 = self.encrypted_message.clone();
+                let encrypted_message: u128 = self.encrypted_message;
                 let d: u128 = self.d;
-                let n: u128 = self.n.clone();
+                let n: u128 = self.n;
                 self.progress_decrypt = true;
 
                 return Task::future(async move {
